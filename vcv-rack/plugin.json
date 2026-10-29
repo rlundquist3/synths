@@ -1,0 +1,23 @@
+{
+  "slug": "ambivalent",
+  "name": "Ambivalent",
+  "version": "2.0.0",
+  "license": "MIT",
+  "brand": "Ambivalent",
+  "author": "Riley Lundquist",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "SineOscillator",
+      "name": "Sine",
+      "description": "Simple Sine Oscillator",
+      "tags": []
+    }
+  ]
+}

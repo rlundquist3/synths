@@ -1,0 +1,15 @@
+[package]
+name = "dsp"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "dsp"
+crate-type = ["staticlib"]
+
+[dependencies]
+cxx = "1.0.205"
+dsp-core = { path = "../../dsp-core" }
+
+[build-dependencies]
+cxx-build = "1.0.205"
