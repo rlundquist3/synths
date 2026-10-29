@@ -1,0 +1,45 @@
+#[derive(Debug, Clone)]
+pub struct Parameter {
+    pub name: &'static str,
+    pub value: f32,
+    pub delta: f32,
+    pub range: (f32, f32),
+}
+
+impl Parameter {
+    pub fn new(name: &'static str, initial: f32, delta: f32, range: (f32, f32)) -> Self {
+        Parameter {
+            name,
+            value: initial,
+            delta,
+            range,
+        }
+    }
+
+    pub fn get_value(&self) -> f32 {
+        self.value
+    }
+
+    pub fn get_range(&self) -> (f32, f32) {
+        self.range
+    }
+
+    pub fn get_name(&self) -> &str {
+        self.name
+    }
+
+    pub fn set_value(&mut self, new_value: f32) {
+        self.value = new_value;
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum ParameterChange {
+    Increment,
+    Decrement,
+}
+
+pub trait UserParameters {
+    fn get_parameters(&self) -> &[Parameter];
+    fn update_parameter(&mut self, index: usize, change: ParameterChange) -> Option<Parameter>;
+}
