@@ -14,7 +14,7 @@
   "changelogUrl": "",
   "modules": [
     {
-      "slug": "SineOscillator",
+      "slug": "VCO",
       "name": "Sine",
       "description": "Simple Sine Oscillator",
       "tags": []
