@@ -65,7 +65,7 @@ struct EnvelopeGenerator : Module
 			output = envelope->next();
 		}
 
-		outputs[OUT_OUTPUT].setVoltage(output);
+				outputs[OUT_OUTPUT].setVoltage(output);
 	}
 };
 
@@ -81,10 +81,10 @@ struct EnvelopeWidget : ModuleWidget
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<VCVSlider>(mm2px(Vec(5.628, 203.154)), module, EnvelopeGenerator::ATTACK_PARAM));
-		addParam(createParam<VCVSlider>(mm2px(Vec(14.436, 203.154)), module, EnvelopeGenerator::DECAY_PARAM));
-		addParam(createParam<VCVSlider>(mm2px(Vec(23.052, 203.154)), module, EnvelopeGenerator::SUSTAIN_PARAM));
-		addParam(createParam<VCVSlider>(mm2px(Vec(32.508, 203.154)), module, EnvelopeGenerator::RELEASE_PARAM));
+		addParam(createParam<VCVSlider>(mm2px(Vec(3.628, 34.654)), module, EnvelopeGenerator::ATTACK_PARAM));
+		addParam(createParam<VCVSlider>(mm2px(Vec(12.436, 34.654)), module, EnvelopeGenerator::DECAY_PARAM));
+		addParam(createParam<VCVSlider>(mm2px(Vec(21.052, 34.654)), module, EnvelopeGenerator::SUSTAIN_PARAM));
+		addParam(createParam<VCVSlider>(mm2px(Vec(30.508, 34.654)), module, EnvelopeGenerator::RELEASE_PARAM));
 
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(12.264, 107.938)), module, EnvelopeGenerator::GATE_INPUT));
 
