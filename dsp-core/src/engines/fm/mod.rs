@@ -114,7 +114,70 @@ impl UserParameters for FMSynth {
         &self.parameters
     }
 
-    fn update_parameter(&mut self, index: usize, change: ParameterChange) -> Option<Parameter> {
+    fn set_parameter(&mut self, index: usize, value: f32) {
+        let synth_param_count = self.parameters.len();
+
+        if index >= synth_param_count {
+            self.voices.voices.iter_mut().for_each(|voice| {
+                voice
+                    .envelope
+                    .set_parameter(index - synth_param_count, value);
+            });
+            self.envelope
+                .set_parameter(index - synth_param_count, value);
+        } else if let Some(param) = self.parameters.get_mut(index) {
+            let value = value.clamp(param.range.0, param.range.1);
+            param.set_value(value);
+
+            match index {
+                0 => {
+                    let waveform = match value {
+                        1.0 => Waveform::Sine,
+                        2.0 => Waveform::Sawtooth,
+                        3.0 => Waveform::Square,
+                        4.0 => Waveform::Triangle,
+                        _ => Waveform::Sine,
+                    };
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        voice.set_carrier_waveform(waveform.clone());
+                    });
+                }
+                1 => {
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        let existing = voice.get_freq_ratio();
+                        voice.set_freq_ratio(FreqRatio(value, existing.1))
+                    });
+                }
+                2 => {
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        let existing = voice.get_freq_ratio();
+                        voice.set_freq_ratio(FreqRatio(existing.0, value))
+                    });
+                }
+                3 => {
+                    self.voices
+                        .voices
+                        .iter_mut()
+                        .for_each(|voice| voice.set_mod_index(value));
+                }
+                4 => {
+                    self.voices
+                        .voices
+                        .iter_mut()
+                        .for_each(|voice| voice.set_lfo_amp(value));
+                }
+                5 => {
+                    self.voices
+                        .voices
+                        .iter_mut()
+                        .for_each(|voice| voice.set_lfo_freq(value));
+                }
+                _ => {}
+            }
+        }
+    }
+
+    fn update_parameter(&mut self, index: usize, change: ParameterChange) {
         let synth_param_count = self.parameters.len();
 
         if index >= synth_param_count {
@@ -123,70 +186,16 @@ impl UserParameters for FMSynth {
                     .envelope
                     .update_parameter(index - synth_param_count, change.clone());
             });
-            return self
-                .envelope
+            self.envelope
                 .update_parameter(index - synth_param_count, change);
-        }
+        } else if let Some(param) = self.parameters.get_mut(index) {
+            let delta = match change {
+                Increment => param.delta,
+                Decrement => -param.delta,
+            };
+            let updated_value = (param.get_value() + delta).clamp(param.range.0, param.range.1);
 
-        let param: &mut Parameter = self.parameters.get_mut(index)?;
-        let delta = match change {
-            Increment => param.delta,
-            Decrement => -param.delta,
-        };
-        let updated_value = (param.get_value() + delta).clamp(param.range.0, param.range.1);
-
-        param.set_value(updated_value);
-
-        match index {
-            0 => {
-                let waveform = match updated_value {
-                    1.0 => Waveform::Sine,
-                    2.0 => Waveform::Sawtooth,
-                    3.0 => Waveform::Square,
-                    4.0 => Waveform::Triangle,
-                    _ => Waveform::Sine,
-                };
-                self.voices.voices.iter_mut().for_each(|voice| {
-                    voice.set_carrier_waveform(waveform.clone());
-                });
-                Some(param.clone())
-            }
-            1 => {
-                self.voices.voices.iter_mut().for_each(|voice| {
-                    let existing = voice.get_freq_ratio();
-                    voice.set_freq_ratio(FreqRatio(updated_value, existing.1))
-                });
-                Some(param.clone())
-            }
-            2 => {
-                self.voices.voices.iter_mut().for_each(|voice| {
-                    let existing = voice.get_freq_ratio();
-                    voice.set_freq_ratio(FreqRatio(existing.0, updated_value))
-                });
-                Some(param.clone())
-            }
-            3 => {
-                self.voices
-                    .voices
-                    .iter_mut()
-                    .for_each(|voice| voice.set_mod_index(updated_value));
-                Some(param.clone())
-            }
-            4 => {
-                self.voices
-                    .voices
-                    .iter_mut()
-                    .for_each(|voice| voice.set_lfo_amp(updated_value));
-                Some(param.clone())
-            }
-            5 => {
-                self.voices
-                    .voices
-                    .iter_mut()
-                    .for_each(|voice| voice.set_lfo_freq(updated_value));
-                Some(param.clone())
-            }
-            _ => None,
+            self.set_parameter(index, updated_value);
         }
     }
 }

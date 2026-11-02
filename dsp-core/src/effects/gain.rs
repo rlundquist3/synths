@@ -62,15 +62,19 @@ impl UserParameters for Gain {
         &self.parameters
     }
 
-    fn update_parameter(&mut self, index: usize, change: ParameterChange) -> Option<Parameter> {
-        let param = self.parameters.get_mut(index)?;
+    fn set_parameter(&mut self, index: usize, value: f32) {
+        if let Some(param) = self.parameters.get_mut(index) {
+            param.set_value(value.clamp(param.range.0, param.range.1))
+        }
+    }
 
-        let delta = match change {
-            Increment => param.delta,
-            Decrement => -param.delta,
-        };
-        param.set_value((param.get_value() + delta).clamp(param.range.0, param.range.1));
-
-        Some(param.clone())
+    fn update_parameter(&mut self, index: usize, change: ParameterChange) {
+        if let Some(param) = self.parameters.get_mut(index) {
+            let delta = match change {
+                Increment => param.delta,
+                Decrement => -param.delta,
+            };
+            param.set_value((param.get_value() + delta).clamp(param.range.0, param.range.1));
+        }
     }
 }

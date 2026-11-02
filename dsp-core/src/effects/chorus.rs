@@ -150,16 +150,21 @@ impl UserParameters for Chorus {
         &self.parameters
     }
 
-    fn update_parameter(&mut self, index: usize, change: ParameterChange) -> Option<Parameter> {
-        let param = self.parameters.get_mut(index)?;
-        let delta = match change {
-            Increment => param.delta,
-            Decrement => -param.delta,
-        };
+    fn set_parameter(&mut self, index: usize, value: f32) {
+        if let Some(param) = self.parameters.get_mut(index) {
+            param.set_value(value.clamp(param.range.0, param.range.1))
+        }
+    }
 
-        let updated_value = (param.get_value() + delta).clamp(param.range.0, param.range.1);
-        param.set_value(updated_value);
+    fn update_parameter(&mut self, index: usize, change: ParameterChange) {
+        if let Some(param) = self.parameters.get_mut(index) {
+            let delta = match change {
+                Increment => param.delta,
+                Decrement => -param.delta,
+            };
 
-        Some(param.clone())
+            let updated_value = (param.get_value() + delta).clamp(param.range.0, param.range.1);
+            param.set_value(updated_value);
+        }
     }
 }

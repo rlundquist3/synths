@@ -41,5 +41,6 @@ pub enum ParameterChange {
 
 pub trait UserParameters {
     fn get_parameters(&self) -> &[Parameter];
-    fn update_parameter(&mut self, index: usize, change: ParameterChange) -> Option<Parameter>;
+    fn set_parameter(&mut self, index: usize, value: f32);
+    fn update_parameter(&mut self, index: usize, change: ParameterChange);
 }
