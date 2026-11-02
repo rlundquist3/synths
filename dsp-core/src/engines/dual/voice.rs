@@ -1,7 +1,7 @@
 use alloc::sync::Arc;
 use core::sync::atomic::AtomicBool;
 
-use crate::amp_envelope::AmpEnvelope;
+use crate::adsr_envelope::ADSREnvelope;
 use crate::midi::get_linear_bent_freq;
 use crate::oscillator::{Oscillator, Waveform};
 use crate::voices::Voice;
@@ -15,12 +15,12 @@ pub struct DualOscVoice {
     lfo: Oscillator,
     last_sample: f32,
 
-    pub envelope: AmpEnvelope,
+    pub envelope: ADSREnvelope,
     pub on: Arc<AtomicBool>,
 }
 
 impl DualOscVoice {
-    pub fn new(envelope: AmpEnvelope, lfo: Oscillator) -> Self {
+    pub fn new(envelope: ADSREnvelope, lfo: Oscillator) -> Self {
         DualOscVoice {
             freq: 0.0,
             midi_note: 0,

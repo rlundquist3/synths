@@ -1,6 +1,6 @@
 #![no_std]
 
-pub mod amp_envelope;
+pub mod adsr_envelope;
 pub mod buffer_pool;
 pub mod chain;
 pub mod effects;

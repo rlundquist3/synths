@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
-pub struct AmpEnvelope {
+pub struct ADSREnvelope {
     attack_samples: u32,
     decay_samples: u32,
     sustain: f32,
@@ -21,12 +21,13 @@ pub struct AmpEnvelope {
     release_step: f32,
     elapsed_samples: u32,
     amp: f32,
+    open: bool,
     releasing: bool,
     release_complete: bool,
     parameters: Vec<Parameter>,
 }
 
-impl AmpEnvelope {
+impl ADSREnvelope {
     pub fn new(attack: f32, decay: f32, sustain: f32, release: f32) -> Self {
         let attack_samples = (attack * SAMPLE_RATE as f32) as u32;
         let decay_samples = (decay * SAMPLE_RATE as f32) as u32;
@@ -36,7 +37,7 @@ impl AmpEnvelope {
         let decay_step = (1.0 - sustain) / decay_samples as f32;
         let release_step = sustain / release_samples as f32;
 
-        AmpEnvelope {
+        ADSREnvelope {
             attack_samples,
             decay_samples,
             sustain,
@@ -46,6 +47,7 @@ impl AmpEnvelope {
             release_step,
             elapsed_samples: 0,
             amp: 0.0,
+            open: false,
             releasing: false,
             release_complete: true,
             parameters: vec![
@@ -63,6 +65,10 @@ impl AmpEnvelope {
         self.release_step = self.amp / self.release_samples as f32;
     }
 
+    pub fn get_open(&self) -> bool {
+        self.open
+    }
+
     pub fn get_releasing(&self) -> bool {
         self.releasing
     }
@@ -72,7 +78,7 @@ impl AmpEnvelope {
     }
 }
 
-impl Iterator for AmpEnvelope {
+impl Iterator for ADSREnvelope {
     type Item = f32;
 
     fn next(&mut self) -> Option<f32> {
@@ -111,7 +117,7 @@ impl Iterator for AmpEnvelope {
     }
 }
 
-impl UserParameters for AmpEnvelope {
+impl UserParameters for ADSREnvelope {
     fn get_parameters(&self) -> &[Parameter] {
         &self.parameters
     }

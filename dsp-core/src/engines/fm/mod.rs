@@ -11,7 +11,7 @@ use crate::parameter::UserParameters;
 use crate::utils::{LFO_AMP_RANGE, LFO_FREQ_RANGE};
 use crate::voices::{Voice, Voices};
 use crate::{
-    amp_envelope::AmpEnvelope, effects::Effect, engines::fm::fm_synth_voice::FMSynthVoice,
+    adsr_envelope::ADSREnvelope, effects::Effect, engines::fm::fm_synth_voice::FMSynthVoice,
     parameter::Parameter,
 };
 
@@ -26,13 +26,13 @@ pub struct FreqRatio(pub f32, pub f32);
 pub struct FMSynth {
     pub voices: Voices<FMSynthVoice>,
     headroom_gain: Gain,
-    envelope: AmpEnvelope,
+    envelope: ADSREnvelope,
     parameters: Vec<Parameter>,
 }
 
 impl FMSynth {
     pub fn new() -> Self {
-        let envelope = AmpEnvelope::new(0.3, 0.2, 0.8, 0.3);
+        let envelope = ADSREnvelope::new(0.3, 0.2, 0.8, 0.3);
         let signal_source = FMSynthVoice::new(envelope.clone());
         let voices = Voices::new((0..VOICE_COUNT).map(|_| signal_source.clone()).collect());
 

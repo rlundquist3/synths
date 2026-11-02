@@ -18,6 +18,12 @@
       "name": "Sine",
       "description": "Simple Sine Oscillator",
       "tags": []
+    },
+    {
+      "slug": "Envelope",
+      "name": "Envelope",
+      "description": "",
+      "tags": []
     }
   ]
 }

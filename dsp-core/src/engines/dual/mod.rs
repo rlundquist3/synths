@@ -12,7 +12,7 @@ use crate::parameter::ParameterChange::{self, Decrement, Increment};
 use crate::parameter::UserParameters;
 use crate::utils::{LFO_AMP_RANGE, LFO_FREQ_RANGE};
 use crate::voices::{Voice, Voices};
-use crate::{amp_envelope::AmpEnvelope, effects::Effect, parameter::Parameter};
+use crate::{adsr_envelope::ADSREnvelope, effects::Effect, parameter::Parameter};
 
 mod voice;
 
@@ -21,13 +21,13 @@ const VOICE_COUNT: usize = 6;
 pub struct DualOsc {
     pub voices: Voices<DualOscVoice>,
     headroom_gain: Gain,
-    envelope: AmpEnvelope,
+    envelope: ADSREnvelope,
     parameters: Vec<Parameter>,
 }
 
 impl DualOsc {
     pub fn new() -> Self {
-        let envelope = AmpEnvelope::new(0.3, 0.3, 0.9, 0.2);
+        let envelope = ADSREnvelope::new(0.3, 0.3, 0.9, 0.2);
         let lfo = Oscillator::new(Waveform::Sine);
         let voice = DualOscVoice::new(envelope.clone(), lfo.clone());
         let voices = Voices::new((0..VOICE_COUNT).map(|_| voice.clone()).collect());

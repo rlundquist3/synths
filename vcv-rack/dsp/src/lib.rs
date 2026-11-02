@@ -1,5 +1,8 @@
-use cxx::CxxVector;
-use ffi::*;
+mod envelope;
+mod oscillator;
+
+use envelope::{Envelope, new_envelope};
+use oscillator::{Oscillator, new_oscillator};
 
 #[cxx::bridge]
 mod ffi {
@@ -17,27 +20,15 @@ mod ffi {
         // fn set_sample_rate(&mut self, freq: f32);
         fn set_freq(&mut self, freq: f32);
     }
-}
 
-pub struct Oscillator(dsp_core::oscillator::Oscillator);
-
-impl Oscillator {
-    fn next_sample_by_waveform(&mut self) -> SamplesByWaveform {
-        let s = self.0.next_sample_by_waveform();
-        SamplesByWaveform {
-            sine: s.sine,
-            sawtooth: s.sawtooth,
-            square: s.square,
-            triangle: s.triangle,
-        }
+    extern "Rust" {
+        type Envelope;
+        fn new_envelope() -> Box<Envelope>;
+        fn get_releasing(&self) -> bool;
+        fn get_release_complete(&self) -> bool;
+        fn set_releasing(&mut self);
+        fn decrement_parameter(&mut self, index: usize);
+        fn increment_parameter(&mut self, index: usize);
+        fn next(&mut self) -> f32;
     }
-    fn set_freq(&mut self, freq: f32) {
-        self.0.set_freq(freq);
-    }
-}
-
-fn new_oscillator() -> Box<Oscillator> {
-    Box::new(Oscillator(dsp_core::oscillator::Oscillator::new(
-        dsp_core::oscillator::Waveform::Sine,
-    )))
 }

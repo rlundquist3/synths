@@ -1,5 +1,5 @@
 use crate::{
-    amp_envelope::AmpEnvelope,
+    adsr_envelope::ADSREnvelope,
     engines::fm::FreqRatio,
     midi::get_linear_bent_freq,
     oscillator::{Oscillator, Waveform, sample_for_phase},
@@ -20,12 +20,12 @@ pub struct FMSynthVoice {
     lfo: Oscillator,
     last_sample: f32,
 
-    pub envelope: AmpEnvelope,
+    pub envelope: ADSREnvelope,
     pub on: Arc<AtomicBool>,
 }
 
 impl FMSynthVoice {
-    pub fn new(envelope: AmpEnvelope) -> Self {
+    pub fn new(envelope: ADSREnvelope) -> Self {
         let mut lfo = Oscillator::new(Waveform::Sine);
         lfo.set_freq(0.0);
 
