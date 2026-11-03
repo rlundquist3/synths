@@ -1,14 +1,18 @@
 use core::f32::consts::PI;
 use micromath::F32Ext;
 
-use crate::{SAMPLE_RATE, effects::filters::biquad::Biquad};
+use crate::effects::filters::biquad::Biquad;
 
 // reference: https://www.w3.org/TR/audio-eq-cookbook/#formulae
 
 pub const HP_CUTOFF_RANGE: (f32, f32) = (1000.0, 20000.0);
 
-fn get_normalized_coefficients(cutoff_freq: f32, q: f32) -> ((f32, f32, f32), (f32, f32, f32)) {
-    let omega = 2.0 * PI * cutoff_freq / SAMPLE_RATE as f32;
+fn get_normalized_coefficients(
+    cutoff_freq: f32,
+    q: f32,
+    sample_rate: u32,
+) -> ((f32, f32, f32), (f32, f32, f32)) {
+    let omega = 2.0 * PI * cutoff_freq / sample_rate as f32;
     let alpha = omega.sin() / (2.0 * q);
 
     let a_0 = 1.0 + alpha;

@@ -16,7 +16,7 @@ mod ffi {
         type Oscillator;
         fn new_oscillator() -> Box<Oscillator>;
         fn next_sample_by_waveform(&mut self) -> SamplesByWaveform;
-        // fn set_sample_rate(&mut self, freq: f32);
+        fn set_sample_rate(&mut self, sample_rate: u32);
         fn set_freq(&mut self, freq: f32);
     }
 
@@ -30,6 +30,7 @@ mod ffi {
     extern "Rust" {
         type Envelope;
         fn new_envelope() -> Box<Envelope>;
+        fn set_sample_rate(&mut self, sample_rate: u32);
         fn get_releasing(&self) -> bool;
         fn get_release_complete(&self) -> bool;
         fn set_releasing(&mut self);

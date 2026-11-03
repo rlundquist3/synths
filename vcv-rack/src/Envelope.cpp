@@ -85,6 +85,11 @@ struct EnvelopeGenerator : Module
 
 		outputs[OUT_OUTPUT].setVoltage(output);
 	}
+
+	void onSampleRateChange(const SampleRateChangeEvent &e)
+	{
+		envelope->set_sample_rate(e.sampleRate);
+	}
 };
 
 struct EnvelopeWidget : ModuleWidget

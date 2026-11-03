@@ -13,6 +13,10 @@ impl Oscillator {
         }
     }
 
+    pub(crate) fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.0.set_sample_rate(sample_rate);
+    }
+
     pub(crate) fn set_freq(&mut self, freq: f32) {
         self.0.set_freq(freq);
     }

@@ -10,7 +10,7 @@ use rand_xoshiro::{
 
 use crate::buffer_pool::BufferPool;
 use crate::{
-    SAMPLE_RATE,
+    DEFAULT_SAMPLE_RATE,
     effects::{Effect, EffectComponent, effect_components::lfo_delay_line::LFODelay},
     parameter::{
         Parameter,
@@ -32,6 +32,7 @@ fn random_range(rng: &mut Xoroshiro128Plus, range: Range<f32>) -> f32 {
 
 #[derive(Debug)]
 pub struct Chorus {
+    sample_rate: u32,
     on: bool,
     voices: Vec<LFODelay>,
     voice_parameters: Vec<Parameter>,
@@ -74,6 +75,7 @@ impl Chorus {
         }
 
         Chorus {
+            sample_rate: DEFAULT_SAMPLE_RATE,
             on: false,
             voices,
             voice_parameters,
@@ -81,6 +83,10 @@ impl Chorus {
             parameters,
             rand_rng,
         }
+    }
+
+    pub fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.sample_rate = sample_rate;
     }
 
     fn adjust_parameters(&mut self) {
@@ -103,7 +109,7 @@ impl Chorus {
                     };
                     let new_target = random_range(rand_rng, range);
                     let new_step = (new_target - current)
-                        / (random_range(rand_rng, 1.0..5.0) * SAMPLE_RATE as f32);
+                        / (random_range(rand_rng, 1.0..5.0) * self.sample_rate as f32);
                     targets[i] = (new_target, new_step);
                 } else {
                     p.set_value(current + step);

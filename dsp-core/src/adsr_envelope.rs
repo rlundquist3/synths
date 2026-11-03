@@ -2,7 +2,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 
 use crate::{
-    SAMPLE_RATE,
+    DEFAULT_SAMPLE_RATE,
     parameter::{
         Parameter,
         ParameterChange::{self, Decrement, Increment},
@@ -12,6 +12,7 @@ use crate::{
 
 #[derive(Clone, Debug)]
 pub struct ADSREnvelope {
+    sample_rate: u32,
     attack_samples: u32,
     decay_samples: u32,
     sustain: f32,
@@ -29,15 +30,17 @@ pub struct ADSREnvelope {
 
 impl ADSREnvelope {
     pub fn new(attack: f32, decay: f32, sustain: f32, release: f32) -> Self {
-        let attack_samples = (attack * SAMPLE_RATE as f32) as u32;
-        let decay_samples = (decay * SAMPLE_RATE as f32) as u32;
-        let release_samples = (release * SAMPLE_RATE as f32) as u32;
+        let sample_rate = DEFAULT_SAMPLE_RATE;
+        let attack_samples = (attack * sample_rate as f32) as u32;
+        let decay_samples = (decay * sample_rate as f32) as u32;
+        let release_samples = (release * sample_rate as f32) as u32;
 
         let attack_step = 1.0 / attack_samples as f32;
         let decay_step = (1.0 - sustain) / decay_samples as f32;
         let release_step = sustain / release_samples as f32;
 
         ADSREnvelope {
+            sample_rate,
             attack_samples,
             decay_samples,
             sustain,
@@ -57,6 +60,10 @@ impl ADSREnvelope {
                 Parameter::new("Release", release, 0.1, (0.0, 2.0)),
             ],
         }
+    }
+
+    pub fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.sample_rate = sample_rate;
     }
 
     pub fn set_releasing(&mut self) {
@@ -129,12 +136,12 @@ impl UserParameters for ADSREnvelope {
 
             match index {
                 0 => {
-                    let attack_samples = (value * SAMPLE_RATE as f32) as u32;
+                    let attack_samples = (value * self.sample_rate as f32) as u32;
                     self.attack_samples = attack_samples;
                     self.attack_step = 1.0 / attack_samples as f32;
                 }
                 1 => {
-                    let decay_samples = (value * SAMPLE_RATE as f32) as u32;
+                    let decay_samples = (value * self.sample_rate as f32) as u32;
                     self.decay_samples = decay_samples;
                     self.decay_step = (1.0 - self.sustain) / decay_samples as f32;
                 }
@@ -144,7 +151,7 @@ impl UserParameters for ADSREnvelope {
                     self.release_step = value / self.release_samples as f32;
                 }
                 3 => {
-                    let release_samples = (value * SAMPLE_RATE as f32) as u32;
+                    let release_samples = (value * self.sample_rate as f32) as u32;
                     self.release_samples = release_samples;
                     self.release_step = self.sustain / release_samples as f32;
                 }

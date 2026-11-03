@@ -4,6 +4,10 @@ use dsp_core::parameter::UserParameters;
 pub struct Envelope(dsp_core::adsr_envelope::ADSREnvelope);
 
 impl Envelope {
+    pub(crate) fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.0.set_sample_rate(sample_rate);
+    }
+
     pub(crate) fn get_releasing(&self) -> bool {
         self.0.get_releasing()
     }

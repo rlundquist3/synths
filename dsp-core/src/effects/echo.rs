@@ -1,5 +1,5 @@
 use crate::{
-    SAMPLE_RATE,
+    DEFAULT_SAMPLE_RATE,
     buffer_pool::BufferPool,
     effects::Effect,
     parameter::{
@@ -15,6 +15,7 @@ const MAX_DELAY_SECS: f32 = 1.0;
 
 #[derive(Debug)]
 pub struct Echo {
+    sample_rate: u32,
     on: bool,
     buffer: &'static mut [f32],
     write_index: usize,
@@ -23,9 +24,11 @@ pub struct Echo {
 
 impl Echo {
     pub fn new(delay_secs: f32, amp: f32, buffer_pool: &mut BufferPool) -> Self {
-        let max_samples = (MAX_DELAY_SECS * SAMPLE_RATE as f32) as usize;
+        let sample_rate = DEFAULT_SAMPLE_RATE;
+        let max_samples = (MAX_DELAY_SECS * sample_rate as f32) as usize;
 
         Echo {
+            sample_rate,
             on: false,
             buffer: buffer_pool.take(max_samples),
             write_index: 0,
@@ -34,6 +37,10 @@ impl Echo {
                 Parameter::new("Amp", amp, 0.1, (0.0, 1.0)),
             ],
         }
+    }
+
+    pub fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.sample_rate = sample_rate;
     }
 }
 
@@ -51,7 +58,7 @@ impl Effect for Echo {
             return sample;
         }
 
-        let delay_samples = (self.parameters[0].get_value() * SAMPLE_RATE as f32) as usize;
+        let delay_samples = (self.parameters[0].get_value() * self.sample_rate as f32) as usize;
         let amp = self.parameters[1].get_value();
 
         let max = self.buffer.len();

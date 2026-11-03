@@ -52,6 +52,11 @@ struct VCO : Module
 		outputs[SQUARE_OUTPUT].setVoltage(s.square * 5.f);
 		outputs[TRIANGLE_OUTPUT].setVoltage(s.triangle * 5.f);
 	}
+
+	void onSampleRateChange(const SampleRateChangeEvent &e)
+	{
+		osc->set_sample_rate(e.sampleRate);
+	}
 };
 
 struct VCOWidget : ModuleWidget

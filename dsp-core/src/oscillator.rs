@@ -1,7 +1,7 @@
 use core::f32::consts::PI;
 use micromath::F32Ext;
 
-use crate::SAMPLE_RATE;
+use crate::DEFAULT_SAMPLE_RATE;
 
 #[derive(Clone, Copy, Debug)]
 pub enum Waveform {
@@ -26,6 +26,7 @@ pub struct SamplesByWaveform {
 
 #[derive(Clone, Debug)]
 pub struct Oscillator {
+    sample_rate: u32,
     pub waveform: Waveform,
     pub freq: f32,
     pub phase: f32,
@@ -36,6 +37,7 @@ pub struct Oscillator {
 impl Oscillator {
     pub fn new(waveform: Waveform) -> Self {
         Oscillator {
+            sample_rate: DEFAULT_SAMPLE_RATE,
             waveform: waveform,
             freq: 0.0,
             phase: 0.0,
@@ -44,12 +46,16 @@ impl Oscillator {
         }
     }
 
+    pub fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.sample_rate = sample_rate;
+    }
+
     pub fn set_waveform(&mut self, waveform: Waveform) {
         self.waveform = waveform;
     }
 
     pub fn set_freq(&mut self, freq: f32) {
-        self.phase_delta = freq * 2.0 * PI / (SAMPLE_RATE as f32);
+        self.phase_delta = freq * 2.0 * PI / (self.sample_rate as f32);
         self.freq = freq;
     }
 
@@ -72,7 +78,7 @@ impl Oscillator {
     // TODO: evaluate moving LFO into oscillator so engines can just call next_phase/next_sample and DRY things up.
 
     pub fn next_phase_with_mod(&mut self, modulation: f32) -> f32 {
-        let delta = self.freq * (1.0 + modulation) * 2.0 * PI / (SAMPLE_RATE as f32);
+        let delta = self.freq * (1.0 + modulation) * 2.0 * PI / (self.sample_rate as f32);
         self.phase += delta;
 
         if self.phase >= 2.0 * PI {

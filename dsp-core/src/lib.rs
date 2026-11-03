@@ -13,5 +13,4 @@ pub mod voices;
 
 extern crate alloc;
 
-// TODO: might want to make this a member of the various structs that use it, with setters
-pub static SAMPLE_RATE: u32 = 48_000;
+pub static DEFAULT_SAMPLE_RATE: u32 = 48_000;

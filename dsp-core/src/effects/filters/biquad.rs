@@ -2,6 +2,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 
 use crate::{
+    DEFAULT_SAMPLE_RATE,
     effects::Effect,
     parameter::{
         Parameter,
@@ -12,10 +13,11 @@ use crate::{
 
 pub const Q_RANGE: (f32, f32) = (0.1, 10.0);
 
-pub type NormalizedCoefficientsFn = fn(f32, f32) -> ((f32, f32, f32), (f32, f32, f32));
+pub type NormalizedCoefficientsFn = fn(f32, f32, u32) -> ((f32, f32, f32), (f32, f32, f32));
 
 #[derive(Clone, Debug)]
 pub struct Biquad {
+    sample_rate: u32,
     on: bool,
     name: &'static str,
     parameters: Vec<Parameter>,
@@ -34,9 +36,11 @@ impl Biquad {
         q: f32,
         get_normalized_coefficients: NormalizedCoefficientsFn,
     ) -> Self {
-        let (a, b) = get_normalized_coefficients(cutoff_freq, q);
+        let sample_rate = DEFAULT_SAMPLE_RATE;
+        let (a, b) = get_normalized_coefficients(cutoff_freq, q, sample_rate);
 
         Biquad {
+            sample_rate,
             on: false,
             name,
             parameters: vec![
@@ -51,11 +55,15 @@ impl Biquad {
         }
     }
 
+    pub fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.sample_rate = sample_rate;
+    }
+
     fn recalculate_coefficients(&mut self) {
         let cutoff_freq = self.parameters[0].get_value();
         let q = self.parameters[1].get_value();
 
-        let (a, b) = (self.get_normalized_coefficients)(cutoff_freq, q);
+        let (a, b) = (self.get_normalized_coefficients)(cutoff_freq, q, self.sample_rate);
 
         self.a = a;
         self.b = b;

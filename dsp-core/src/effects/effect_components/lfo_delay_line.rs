@@ -1,5 +1,5 @@
 use crate::{
-    SAMPLE_RATE,
+    DEFAULT_SAMPLE_RATE,
     buffer_pool::BufferPool,
     effects::EffectComponent,
     oscillator::{Oscillator, Waveform::Sine},
@@ -9,6 +9,7 @@ use micromath::F32Ext;
 
 #[derive(Debug)]
 pub struct LFODelay {
+    sample_rate: u32,
     lfo: Oscillator,
     lfo_amp: Parameter,
     lfo_freq: Parameter,
@@ -26,11 +27,13 @@ impl LFODelay {
         freq: Parameter,
         buffer_pool: &mut BufferPool,
     ) -> Self {
+        let sample_rate = DEFAULT_SAMPLE_RATE;
         let mut lfo = Oscillator::new(Sine);
         lfo.set_freq(freq.get_value());
-        let max_samples = (MAX_DELAY_SECS * SAMPLE_RATE as f32) as usize;
+        let max_samples = (MAX_DELAY_SECS * sample_rate as f32) as usize;
 
         LFODelay {
+            sample_rate,
             lfo,
             delay_ms,
             lfo_amp: amp,
@@ -38,6 +41,10 @@ impl LFODelay {
             buffer: buffer_pool.take(max_samples),
             write_index: 0,
         }
+    }
+
+    pub fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.sample_rate = sample_rate;
     }
 }
 
@@ -48,7 +55,7 @@ impl EffectComponent for LFODelay {
             self.lfo.set_freq(freq_param);
         }
 
-        let raw_delay_samples = self.delay_ms.get_value() / 1000.0 * SAMPLE_RATE as f32;
+        let raw_delay_samples = self.delay_ms.get_value() / 1000.0 * self.sample_rate as f32;
         let lfo_sample = self.lfo.next_sample();
 
         let delay_samples_mod = lfo_sample * self.lfo_amp.get_value() * raw_delay_samples;
