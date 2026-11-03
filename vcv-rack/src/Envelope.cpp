@@ -31,10 +31,10 @@ struct EnvelopeGenerator : Module
 	EnvelopeGenerator() : envelope(new_envelope())
 	{
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
-		configParam(ATTACK_PARAM, 0.f, 1.f, 0.f, "attack");
-		configParam(DECAY_PARAM, 0.f, 1.f, 0.f, "decay");
-		configParam(SUSTAIN_PARAM, 0.f, 1.f, 0.f, "sustain");
-		configParam(RELEASE_PARAM, 0.f, 1.f, 0.f, "release");
+		configParam(ATTACK_PARAM, 0.f, 1.f, 0.8f, "attack");
+		configParam(DECAY_PARAM, 0.f, 1.f, 0.2f, "decay");
+		configParam(SUSTAIN_PARAM, 0.f, 1.f, 0.8f, "sustain");
+		configParam(RELEASE_PARAM, 0.f, 1.f, 0.3f, "release");
 		configInput(GATE_INPUT, "");
 		configOutput(OUT_OUTPUT, "");
 	}
@@ -45,6 +45,24 @@ struct EnvelopeGenerator : Module
 		float decayParam = params[DECAY_PARAM].getValue();
 		float sustainParam = params[SUSTAIN_PARAM].getValue();
 		float releaseParam = params[RELEASE_PARAM].getValue();
+
+		EnvelopeParameters currentParams = envelope->get_parameter_values();
+		if (attackParam != currentParams.attack)
+		{
+			envelope->set_parameter(0, attackParam);
+		}
+		if (decayParam != currentParams.decay)
+		{
+			envelope->set_parameter(1, decayParam);
+		}
+		if (sustainParam != currentParams.sustain)
+		{
+			envelope->set_parameter(2, sustainParam);
+		}
+		if (releaseParam != currentParams.release)
+		{
+			envelope->set_parameter(3, releaseParam);
+		}
 
 		float gateInput = inputs[GATE_INPUT].getVoltage();
 
@@ -65,7 +83,7 @@ struct EnvelopeGenerator : Module
 			output = envelope->next();
 		}
 
-				outputs[OUT_OUTPUT].setVoltage(output);
+		outputs[OUT_OUTPUT].setVoltage(output);
 	}
 };
 

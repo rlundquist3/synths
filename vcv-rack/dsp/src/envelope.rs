@@ -1,4 +1,5 @@
-use dsp_core::parameter::{ParameterChange, UserParameters};
+use crate::ffi::EnvelopeParameters;
+use dsp_core::parameter::UserParameters;
 
 pub struct Envelope(dsp_core::adsr_envelope::ADSREnvelope);
 
@@ -15,12 +16,17 @@ impl Envelope {
         self.0.set_releasing();
     }
 
-    pub(crate) fn decrement_parameter(&mut self, index: usize) {
-        self.0.update_parameter(index, ParameterChange::Decrement);
+    pub(crate) fn set_parameter(&mut self, index: usize, value: f32) {
+        self.0.set_parameter(index, value);
     }
 
-    pub(crate) fn increment_parameter(&mut self, index: usize) {
-        self.0.update_parameter(index, ParameterChange::Increment);
+    pub(crate) fn get_parameter_values(&self) -> EnvelopeParameters {
+        EnvelopeParameters {
+            attack: self.0.get_parameters()[0].get_value(),
+            decay: self.0.get_parameters()[1].get_value(),
+            sustain: self.0.get_parameters()[2].get_value(),
+            release: self.0.get_parameters()[3].get_value(),
+        }
     }
 
     pub(crate) fn next(&mut self) -> f32 {
