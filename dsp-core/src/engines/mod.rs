@@ -2,6 +2,7 @@ use crate::parameter::{Parameter, UserParameters};
 
 pub mod dual;
 pub mod fm;
+pub mod singing_materials;
 
 pub const ENGINE_COUNT: usize = 2;
 
