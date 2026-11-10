@@ -43,5 +43,5 @@ impl<'a> SingingMaterials<'a> {
 }
 
 pub(crate) unsafe fn new_singing_materials<'a>() -> Box<SingingMaterials<'a>> {
-    Box::new(SingingMaterials(SingingMaterialsVoice::new()))
+    Box::new(SingingMaterials(SingingMaterialsVoice::new(None)))
 }

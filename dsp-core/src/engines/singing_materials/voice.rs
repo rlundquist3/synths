@@ -4,6 +4,7 @@ use alloc::sync::Arc;
 use heapless::Vec;
 
 use crate::DEFAULT_SAMPLE_RATE;
+use crate::adsr_envelope::ADSREnvelope;
 use crate::midi::get_linear_bent_freq;
 use crate::oscillator::{Oscillator, Waveform};
 use crate::voices::Voice;
@@ -11,12 +12,11 @@ use crate::voices::Voice;
 pub const OSCILLATOR_COUNT: usize = 6;
 pub const MATERIAL_COUNT: usize = 4;
 
-/// amps must add up to 1
 #[derive(Debug, Clone)]
 struct Material<'a> {
     name: &'a str,
     ratios: [f32; OSCILLATOR_COUNT],
-    amps: [f32; OSCILLATOR_COUNT],
+    amps: [f32; OSCILLATOR_COUNT], // amps must add up to 1
 }
 
 pub struct SingingMaterialsVoice<'a> {
@@ -26,11 +26,13 @@ pub struct SingingMaterialsVoice<'a> {
     oscillators: Vec<Oscillator, OSCILLATOR_COUNT>,
     materials: Vec<Material<'a>, MATERIAL_COUNT>,
     material_index: usize,
+
+    pub envelope: Option<ADSREnvelope>,
     pub on: Arc<AtomicBool>,
 }
 
 impl<'a> SingingMaterialsVoice<'a> {
-    pub fn new() -> Self {
+    pub fn new(envelope: Option<ADSREnvelope>) -> Self {
         let osc = Oscillator::new(Waveform::Sine);
         let mut oscillators: Vec<Oscillator, OSCILLATOR_COUNT> = Vec::new();
         for _ in 0..OSCILLATOR_COUNT {
@@ -123,6 +125,7 @@ impl<'a> SingingMaterialsVoice<'a> {
             oscillators,
             materials,
             material_index: 0,
+            envelope,
             on: Arc::new(AtomicBool::new(false)),
         }
     }
@@ -158,6 +161,7 @@ impl<'a> Clone for SingingMaterialsVoice<'a> {
             oscillators: self.oscillators.clone(),
             materials: self.materials.clone(),
             material_index: self.material_index,
+            envelope: self.envelope.clone(),
             on: Arc::new(AtomicBool::new(false)),
         }
     }
@@ -181,6 +185,12 @@ impl<'a> Iterator for SingingMaterialsVoice<'a> {
     type Item = f32;
 
     fn next(&mut self) -> Option<Self::Item> {
+        let envelope_amp = self
+            .envelope
+            .as_mut()
+            .and_then(|envelope| envelope.next())
+            .unwrap_or(1.0);
+
         let mut sample = 0.0;
         for i in 0..OSCILLATOR_COUNT {
             sample +=
@@ -188,6 +198,6 @@ impl<'a> Iterator for SingingMaterialsVoice<'a> {
         }
 
         // clamp should be unnecessary, but here for safety
-        Some(sample.clamp(-1.0, 1.0))
+        Some(envelope_amp * sample.clamp(-1.0, 1.0))
     }
 }
