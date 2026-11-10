@@ -20,3 +20,5 @@
  *   - or make temperature affect the relative amplitudes?
  * -
  */
+
+pub mod voice;

@@ -1,8 +1,10 @@
 mod envelope;
 mod oscillator;
+mod singing_materials;
 
 use envelope::{Envelope, new_envelope};
 use oscillator::{Oscillator, new_oscillator};
+use singing_materials::{SingingMaterials, new_singing_materials};
 
 #[cxx::bridge]
 mod ffi {
@@ -37,5 +39,15 @@ mod ffi {
         fn set_parameter(&mut self, index: usize, value: f32);
         fn get_parameter_values(&self) -> EnvelopeParameters;
         fn next(&mut self) -> f32;
+    }
+
+    extern "Rust" {
+        type SingingMaterials<'a>;
+        unsafe fn new_singing_materials<'a>() -> Box<SingingMaterials<'a>>;
+        fn next_sample(&mut self) -> f32;
+        fn set_freq(&mut self, freq: f32);
+        fn set_material(&mut self, index: usize);
+        // fn get_material_name(&self) -> &'a str;
+        fn set_waveform(&mut self, index: usize);
     }
 }

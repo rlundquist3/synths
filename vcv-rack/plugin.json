@@ -16,12 +16,18 @@
     {
       "slug": "VCO",
       "name": "Sine",
-      "description": "Simple Sine Oscillator",
+      "description": "Simple Oscillator",
       "tags": []
     },
     {
       "slug": "Envelope",
       "name": "Envelope",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "SingingMaterials",
+      "name": "SingingMaterials",
       "description": "",
       "tags": []
     }
