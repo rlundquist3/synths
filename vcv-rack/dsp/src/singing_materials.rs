@@ -7,6 +7,10 @@ pub struct SingingMaterials<'a>(
 );
 
 impl<'a> SingingMaterials<'a> {
+    pub(crate) fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.0.set_sample_rate(sample_rate);
+    }
+
     pub(crate) fn next_sample(&mut self) -> f32 {
         self.0.next().unwrap_or(0.0)
     }
@@ -19,9 +23,9 @@ impl<'a> SingingMaterials<'a> {
         self.0.set_material(index);
     }
 
-    // pub(crate) fn get_material_name(&self) -> &'a str {
-    //     self.0.get_material_name()
-    // }
+    pub(crate) fn get_material_name(&self) -> &'a str {
+        self.0.clone().get_material_name()
+    }
 
     pub(crate) fn set_waveform(&mut self, index: usize) {
         let waveform = match index {

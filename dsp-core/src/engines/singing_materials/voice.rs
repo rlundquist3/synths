@@ -3,6 +3,7 @@ use core::sync::atomic::AtomicBool;
 use alloc::sync::Arc;
 use heapless::Vec;
 
+use crate::DEFAULT_SAMPLE_RATE;
 use crate::midi::get_linear_bent_freq;
 use crate::oscillator::{Oscillator, Waveform};
 use crate::voices::Voice;
@@ -19,6 +20,7 @@ struct Material<'a> {
 }
 
 pub struct SingingMaterialsVoice<'a> {
+    sample_rate: u32,
     freq: f32,
     midi_note: usize,
     oscillators: Vec<Oscillator, OSCILLATOR_COUNT>,
@@ -115,6 +117,7 @@ impl<'a> SingingMaterialsVoice<'a> {
         ]);
 
         SingingMaterialsVoice {
+            sample_rate: DEFAULT_SAMPLE_RATE,
             freq: 0.0,
             midi_note: 0,
             oscillators,
@@ -122,6 +125,10 @@ impl<'a> SingingMaterialsVoice<'a> {
             material_index: 0,
             on: Arc::new(AtomicBool::new(false)),
         }
+    }
+
+    pub fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.sample_rate = sample_rate;
     }
 
     pub fn set_material(&mut self, index: usize) {
@@ -145,6 +152,7 @@ impl<'a> SingingMaterialsVoice<'a> {
 impl<'a> Clone for SingingMaterialsVoice<'a> {
     fn clone(&self) -> Self {
         SingingMaterialsVoice {
+            sample_rate: self.sample_rate,
             freq: self.freq,
             midi_note: self.midi_note,
             oscillators: self.oscillators.clone(),

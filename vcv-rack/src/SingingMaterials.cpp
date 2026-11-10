@@ -76,13 +76,44 @@ struct SingingMaterialsModule : Module
 		float pitch = pitchParam + vOctInput;
 		engine->set_freq(dsp::FREQ_C4 * std::pow(2.f, pitch));
 
+		float waveformParam = params[WAVEFORM_PARAM].getValue();
+		engine->set_waveform(waveformParam);
+
 		float sample = engine->next_sample();
 		outputs[OUT_OUTPUT].setVoltage(sample * 5.f);
 	}
 
 	void onSampleRateChange(const SampleRateChangeEvent &e)
 	{
-		// TODO: add sample rate to SingingMaterials w/ setter
+		engine->set_sample_rate(e.sampleRate);
+	}
+};
+
+struct MaterialChoice : LedDisplayChoice
+{
+	SingingMaterialsModule *module = nullptr;
+
+	void step() override
+	{
+		const auto &labels = SingingMaterialsModule::materialLabels();
+		size_t m = module ? module->getMaterial() : 0;
+		text = m < labels.size() ? labels[m] : "";
+		LedDisplayChoice::step();
+	}
+
+	void onAction(const ActionEvent &e) override
+	{
+		if (!module)
+			return;
+		Menu *menu = createMenu();
+		menu->addChild(createMenuLabel("Material"));
+		const auto &labels = SingingMaterialsModule::materialLabels();
+		for (size_t i = 0; i < labels.size(); i++)
+		{
+			menu->addChild(createCheckMenuItem(labels[i], "", [=]()
+											   { return module->getMaterial() == i; }, [=]()
+											   { module->setMaterial(i); }));
+		}
 	}
 };
 
@@ -104,16 +135,15 @@ struct SingingMaterialsWidget : ModuleWidget
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(10.721, 116.601)), module, SingingMaterialsModule::PITCH_INPUT));
 
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(31.252, 116.601)), module, SingingMaterialsModule::OUT_OUTPUT));
-	}
 
-	void appendContextMenu(Menu *menu) override
-	{
-		SingingMaterialsModule *module = getModule<SingingMaterialsModule>();
+		LedDisplay *display = createWidget<LedDisplay>(mm2px(Vec(2.0, 20.0)));
+		display->box.size = mm2px(Vec(36.64, 8.0));
+		addChild(display);
 
-		menu->addChild(new MenuSeparator);
-		menu->addChild(createIndexSubmenuItem("Material", SingingMaterialsModule::materialLabels(), [=]()
-											  { return module->getMaterial(); }, [=](size_t m)
-											  { module->setMaterial(m); }));
+		MaterialChoice *materialChoice = createWidget<MaterialChoice>(Vec(0, 0));
+		materialChoice->box.size = display->box.size;
+		materialChoice->module = module;
+		display->addChild(materialChoice);
 	}
 };
 

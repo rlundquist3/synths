@@ -44,10 +44,11 @@ mod ffi {
     extern "Rust" {
         type SingingMaterials<'a>;
         unsafe fn new_singing_materials<'a>() -> Box<SingingMaterials<'a>>;
+        fn set_sample_rate(&mut self, sample_rate: u32);
         fn next_sample(&mut self) -> f32;
         fn set_freq(&mut self, freq: f32);
         fn set_material(&mut self, index: usize);
-        // fn get_material_name(&self) -> &'a str;
+        unsafe fn get_material_name<'a>(self: &SingingMaterials<'a>) -> &'a str;
         fn set_waveform(&mut self, index: usize);
     }
 }
