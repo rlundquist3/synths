@@ -42,7 +42,7 @@ impl<'a> SingingMaterials<'a> {
             headroom_gain,
             envelope,
             parameters: vec![
-                Parameter::new("Material", 1.0, 1.0, (1.0, 4.0)),
+                Parameter::new("Material", 0.0, 1.0, (0.0, 3.0)),
                 Parameter::new("Wave", 1.0, 1.0, (1.0, 4.0)),
             ],
         }
