@@ -54,6 +54,10 @@ impl<'a> SingingMaterials<'a> {
             voice.set_sample_rate(sample_rate);
         });
     }
+
+    pub fn get_sample_rate(&self) -> u32 {
+        self.sample_rate
+    }
 }
 
 impl<'a> Engine for SingingMaterials<'a> {
