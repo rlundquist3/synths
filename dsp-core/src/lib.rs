@@ -3,6 +3,7 @@
 pub mod adsr_envelope;
 pub mod buffer_pool;
 pub mod chain;
+pub mod controls;
 pub mod effects;
 pub mod engines;
 pub mod midi;
