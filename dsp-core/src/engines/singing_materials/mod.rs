@@ -2,6 +2,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::sync::atomic::Ordering;
 
+use crate::DEFAULT_SAMPLE_RATE;
 use crate::effects::gain::Gain;
 use crate::engines::Engine;
 use crate::engines::singing_materials::material::OSCILLATOR_COUNT;
@@ -19,6 +20,7 @@ pub mod voice;
 const VOICE_COUNT: usize = 6;
 
 pub struct SingingMaterials<'a> {
+    sample_rate: u32,
     pub voices: Voices<SingingMaterialsVoice<'a>>,
     headroom_gain: Gain,
     envelope: ADSREnvelope,
@@ -35,6 +37,7 @@ impl<'a> SingingMaterials<'a> {
         headroom_gain.toggle();
 
         SingingMaterials {
+            sample_rate: DEFAULT_SAMPLE_RATE,
             voices,
             headroom_gain,
             envelope,
@@ -43,6 +46,13 @@ impl<'a> SingingMaterials<'a> {
                 Parameter::new("Wave", 1.0, 1.0, (1.0, 4.0)),
             ],
         }
+    }
+
+    pub fn set_sample_rate(&mut self, sample_rate: u32) {
+        self.sample_rate = sample_rate;
+        self.voices.voices.iter_mut().for_each(|voice| {
+            voice.set_sample_rate(sample_rate);
+        });
     }
 }
 

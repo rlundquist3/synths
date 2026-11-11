@@ -46,6 +46,9 @@ impl<'a> SingingMaterialsVoice<'a> {
 
     pub fn set_sample_rate(&mut self, sample_rate: u32) {
         self.sample_rate = sample_rate;
+        self.oscillators.iter_mut().for_each(|oscillator| {
+            oscillator.set_sample_rate(sample_rate);
+        });
     }
 
     pub fn set_material(&mut self, index: usize) {
