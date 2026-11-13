@@ -1,12 +1,14 @@
-const INPUT_COUNT: usize = 4;
-const OUTPUT_COUNT: usize = 4;
+pub const INPUT_COUNT: usize = 4;
+pub const OUTPUT_COUNT: usize = 4;
 
+#[derive(Debug, Clone)]
 struct IOMapping {
     value: f32,
     output_index: usize,
 }
 
-enum APIToCVModes {
+#[derive(Debug, Clone)]
+pub enum APIToCVModes {
     RealTime,
     Clocked,
 }
@@ -23,26 +25,16 @@ impl APIToCV {
     pub fn new() -> Self {
         APIToCV {
             mode: APIToCVModes::RealTime,
-            inputs: [
-                IOMapping {
-                    value: 0.0,
-                    output_index: 0,
-                },
-                IOMapping {
-                    value: 0.0,
-                    output_index: 1,
-                },
-                IOMapping {
-                    value: 0.0,
-                    output_index: 2,
-                },
-                IOMapping {
-                    value: 0.0,
-                    output_index: 3,
-                },
-            ],
+            inputs: core::array::from_fn(|i| IOMapping {
+                value: 0.0,
+                output_index: i,
+            }),
             outputs: [0.0; OUTPUT_COUNT],
         }
+    }
+
+    pub fn get_mode(&self) -> APIToCVModes {
+        self.mode.clone()
     }
 
     pub fn map_input_to_output(&mut self, input_index: usize, output_index: usize) {
@@ -51,14 +43,6 @@ impl APIToCV {
 
     pub fn receive_input(&mut self, input_index: usize, value: f32) {
         self.inputs[input_index].value += value;
-
-        // this might not be quite right - may just want to check mode from caller and then call next
-        match self.mode {
-            APIToCVModes::RealTime => {
-                self.realtime_output(input_index);
-            }
-            APIToCVModes::Clocked => {}
-        };
     }
 
     pub fn realtime_output(&mut self, input_index: usize) -> [f32; OUTPUT_COUNT] {
