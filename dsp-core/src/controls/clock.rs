@@ -125,7 +125,7 @@ impl Clock {
 #[cfg(test)]
 mod tests {
     use crate::controls::clock::{Clock, Note};
-    use core::assert_eq;
+    use core::{assert, assert_eq};
 
     #[test]
     fn default() {
@@ -161,5 +161,19 @@ mod tests {
         clock.set_time_signature_per_measure(6);
         clock.set_time_signature_base(Note::Eighth);
         assert_eq!(clock.get_tick_ms(), 500);
+    }
+
+    #[test]
+    fn base_other_than_quarter_either_invalid() {
+        let mut clock = Clock::new();
+        for d in [
+            Note::Triplet,
+            Note::Sixteenth,
+            Note::SixteenthTriplet,
+            Note::Thirtysecond,
+        ] {
+            let r = clock.set_division(d);
+            assert!(r.is_err());
+        }
     }
 }
