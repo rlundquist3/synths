@@ -5,20 +5,25 @@ use heapless::Vec;
 
 use crate::DEFAULT_SAMPLE_RATE;
 use crate::adsr_envelope::ADSREnvelope;
-use crate::engines::singing_materials::material::{
-    MATERIAL_COUNT, MATERIALS, Material, OSCILLATOR_COUNT,
-};
+use crate::engines::singing_materials::data::MATERIALS;
+use crate::engines::singing_materials::types::{PeaksBySpecies, PeaksByTemp};
 use crate::midi::get_linear_bent_freq;
 use crate::oscillator::{Oscillator, Waveform};
 use crate::voices::Voice;
+
+pub const OSCILLATOR_COUNT: usize = 9;
 
 pub struct SingingMaterialsVoice<'a> {
     sample_rate: u32,
     freq: f32,
     midi_note: usize,
     oscillators: Vec<Oscillator, OSCILLATOR_COUNT>,
-    materials: Vec<Material<'a>, MATERIAL_COUNT>,
+    // oscillators: &'a [Oscillator],
     material_index: usize,
+    temp: u16,
+    species: &'a str,
+    peaks_by_temp: &'a PeaksByTemp,
+    peaks_by_species: &'a PeaksBySpecies,
 
     pub envelope: Option<ADSREnvelope>,
     pub on: Arc<AtomicBool>,
@@ -32,13 +37,27 @@ impl<'a> SingingMaterialsVoice<'a> {
             oscillators.push(osc.clone()).ok();
         }
 
+        let peaks_by_temp = MATERIALS[0]
+            .peaks_by_temp
+            .iter()
+            .find(|p| p.temp == 0)
+            .unwrap();
+        let peaks_by_species = peaks_by_temp
+            .peaks_by_species
+            .iter()
+            .find(|p| p.species == "total")
+            .unwrap();
+
         SingingMaterialsVoice {
             sample_rate: DEFAULT_SAMPLE_RATE,
             freq: 0.0,
             midi_note: 0,
             oscillators,
-            materials: MATERIALS,
             material_index: 0,
+            temp: 0,
+            species: "total",
+            peaks_by_temp,
+            peaks_by_species,
             envelope,
             on: Arc::new(AtomicBool::new(false)),
         }
@@ -52,11 +71,44 @@ impl<'a> SingingMaterialsVoice<'a> {
     }
 
     pub fn set_material(&mut self, index: usize) {
-        self.material_index = index;
+        if index < MATERIALS.len() {
+            self.material_index = index;
+        }
     }
 
-    pub fn get_material_name(self) -> &'a str {
-        self.materials[self.material_index].name
+    pub fn set_temp(&mut self, temp: u16) {
+        if let Some(peaks_by_temp) = MATERIALS[self.material_index]
+            .peaks_by_temp
+            .iter()
+            .find(|p| p.temp == temp)
+        {
+            self.temp = temp;
+            self.peaks_by_temp = peaks_by_temp;
+        }
+    }
+
+    pub fn set_species(&mut self, species: &'a str) {
+        if let Some(peaks_by_species) = self
+            .peaks_by_temp
+            .peaks_by_species
+            .iter()
+            .find(|p| p.species == species)
+        {
+            self.species = species;
+            self.peaks_by_species = peaks_by_species;
+        }
+    }
+
+    pub fn get_material_name(self) -> &'static str {
+        MATERIALS[self.material_index].name
+    }
+
+    pub fn get_current_temp(&self) -> &'static str {
+        self.peaks_by_temp.formatted_temp
+    }
+
+    pub fn get_current_species(&self) -> &str {
+        self.species
     }
 
     pub fn set_waveform(&mut self, osc_index: usize, waveform: Waveform) {
@@ -96,8 +148,11 @@ impl<'a> Clone for SingingMaterialsVoice<'a> {
             freq: self.freq,
             midi_note: self.midi_note,
             oscillators: self.oscillators.clone(),
-            materials: self.materials.clone(),
             material_index: self.material_index,
+            temp: self.temp,
+            species: self.species,
+            peaks_by_temp: self.peaks_by_temp,
+            peaks_by_species: self.peaks_by_species,
             envelope: self.envelope.clone(),
             on: Arc::new(AtomicBool::new(false)),
         }
@@ -107,7 +162,9 @@ impl<'a> Clone for SingingMaterialsVoice<'a> {
 impl<'a> Voice for SingingMaterialsVoice<'a> {
     fn set_freq(&mut self, freq: f32, midi_note: usize) {
         for i in 0..OSCILLATOR_COUNT {
-            self.oscillators[i].set_freq(freq * self.materials[self.material_index].ratios[i]);
+            if self.peaks_by_species.peaks.len() > i {
+                self.oscillators[i].set_freq(freq * self.peaks_by_species.peaks[i].freq_ratio);
+            }
         }
         self.midi_note = midi_note;
     }
@@ -130,8 +187,10 @@ impl<'a> Iterator for SingingMaterialsVoice<'a> {
 
         let mut sample = 0.0;
         for i in 0..OSCILLATOR_COUNT {
-            sample +=
-                self.materials[self.material_index].amps[i] * self.oscillators[i].next_sample();
+            if self.peaks_by_species.peaks.len() > i {
+                sample +=
+                    self.peaks_by_species.peaks[i].density * self.oscillators[i].next_sample();
+            }
         }
 
         // clamp should be unnecessary, but here for safety

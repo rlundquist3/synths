@@ -5,8 +5,7 @@ use core::sync::atomic::Ordering;
 use crate::DEFAULT_SAMPLE_RATE;
 use crate::effects::gain::Gain;
 use crate::engines::Engine;
-use crate::engines::singing_materials::material::OSCILLATOR_COUNT;
-use crate::engines::singing_materials::voice::SingingMaterialsVoice;
+use crate::engines::singing_materials::voice::{OSCILLATOR_COUNT, SingingMaterialsVoice};
 use crate::midi::MIDI_NOTE_FREQS;
 use crate::oscillator::Waveform;
 use crate::parameter::ParameterChange::{self, Decrement, Increment};
@@ -14,7 +13,8 @@ use crate::parameter::UserParameters;
 use crate::voices::{Voice, Voices};
 use crate::{adsr_envelope::ADSREnvelope, effects::Effect, parameter::Parameter};
 
-pub mod material;
+mod data;
+pub mod types;
 pub mod voice;
 
 const VOICE_COUNT: usize = 6;
