@@ -73,6 +73,7 @@ impl<'a> SingingMaterialsVoice<'a> {
     pub fn set_material(&mut self, index: usize) {
         if index < MATERIALS.len() {
             self.material_index = index;
+            self.set_temp(self.temp);
         }
     }
 
@@ -84,6 +85,7 @@ impl<'a> SingingMaterialsVoice<'a> {
         {
             self.temp = temp;
             self.peaks_by_temp = peaks_by_temp;
+            self.set_species(self.species);
         }
     }
 
