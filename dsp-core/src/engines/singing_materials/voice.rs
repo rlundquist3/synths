@@ -13,12 +13,18 @@ use crate::voices::Voice;
 
 pub const OSCILLATOR_COUNT: usize = 9;
 
+/*
+TODO:
+- add temperature and species isolation parameters
+- play with the width data to inform per-oscillator vibrato
+- play with different envelopes per oscillator (bit of a refactor, but could sound interesting)
+*/
+
 pub struct SingingMaterialsVoice<'a> {
     sample_rate: u32,
     freq: f32,
     midi_note: usize,
     oscillators: Vec<Oscillator, OSCILLATOR_COUNT>,
-    // oscillators: &'a [Oscillator],
     material_index: usize,
     temp: u16,
     species: &'a str,
