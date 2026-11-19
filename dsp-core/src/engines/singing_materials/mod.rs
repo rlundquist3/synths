@@ -1,5 +1,6 @@
 use alloc::vec;
 use alloc::vec::Vec;
+use core::fmt::Write;
 use core::sync::atomic::Ordering;
 
 use crate::DEFAULT_SAMPLE_RATE;
@@ -62,6 +63,16 @@ impl<'a> SingingMaterials<'a> {
 
     pub fn get_material_name(&self) -> &'static str {
         self.voices.voices[0].clone().get_material_name()
+    }
+
+    pub fn get_current_temp(&self) -> &'static str {
+        self.voices.voices[0].clone().get_current_temp()
+    }
+
+    pub fn get_current_species(&self) -> heapless::String<8> {
+        let mut s = heapless::String::<8>::new();
+        write!(s, "{}", self.voices.voices[0].clone().get_current_species()).unwrap();
+        s
     }
 }
 
