@@ -25,7 +25,7 @@ pub struct SingingMaterialsVoice<'a> {
     freq: f32,
     midi_note: usize,
     oscillators: Vec<Oscillator, OSCILLATOR_COUNT>,
-    material_index: usize,
+    material_index: usize, // TODO: may need to keep track of id instead
     temp: u16,
     species: &'a str,
     peaks_by_temp: &'a PeaksByTemp,
@@ -76,7 +76,7 @@ impl<'a> SingingMaterialsVoice<'a> {
         });
     }
 
-    pub fn set_material(&mut self, index: usize) {
+    pub fn set_material_index(&mut self, index: usize) {
         if index < MATERIALS.len() {
             self.material_index = index;
             self.set_temp(self.temp);
@@ -92,6 +92,13 @@ impl<'a> SingingMaterialsVoice<'a> {
             self.temp = temp;
             self.peaks_by_temp = peaks_by_temp;
             self.set_species(self.species);
+        }
+    }
+
+    pub fn set_species_by_index(&mut self, species_index: usize) {
+        if species_index < self.peaks_by_temp.peaks_by_species.len() {
+            let species = self.peaks_by_temp.peaks_by_species[species_index].species;
+            self.set_species(species);
         }
     }
 

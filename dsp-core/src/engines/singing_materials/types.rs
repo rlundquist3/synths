@@ -23,4 +23,5 @@ pub struct Peak {
     pub freq_ratio: f32,
     pub width_ratio: f32,
     pub density: f32,
+    // TODO: consider adding reference frequency (that the ratio came from)
 }

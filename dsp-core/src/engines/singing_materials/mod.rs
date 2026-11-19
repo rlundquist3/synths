@@ -44,6 +44,7 @@ impl<'a> SingingMaterials<'a> {
             parameters: vec![
                 Parameter::new("Material", 0.0, 1.0, (0.0, 3.0)),
                 Parameter::new("Wave", 1.0, 1.0, (1.0, 4.0)),
+                Parameter::new("Species", 0.0, 1.0, (0.0, 2.0)),
             ],
         }
     }
@@ -141,7 +142,7 @@ impl<'a> UserParameters for SingingMaterials<'a> {
             match index {
                 0 => {
                     self.voices.voices.iter_mut().for_each(|voice| {
-                        voice.set_material(value as usize);
+                        voice.set_material_index(value as usize);
                     });
                 }
                 1 => {
@@ -156,6 +157,11 @@ impl<'a> UserParameters for SingingMaterials<'a> {
                         for i in 0..OSCILLATOR_COUNT {
                             voice.set_waveform(i, waveform.clone());
                         }
+                    });
+                }
+                2 => {
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        voice.set_species_by_index(value as usize);
                     });
                 }
                 _ => {}

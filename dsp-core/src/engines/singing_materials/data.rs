@@ -573,6 +573,460 @@ pub const MATERIALS: &[Material] = &[
         ],
     },
     Material {
+        mp_id: "mp-3953",
+        name: "calcite",
+        peaks_by_temp: &[
+            PeaksByTemp {
+                temp: 0,
+                formatted_temp: "athermal",
+                peaks_by_species: &[
+                    PeaksBySpecies {
+                        species: "Ca",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 0.2769326537758239,
+                                width_ratio: 0.12041395945998523,
+                                density: 0.10886571056062583,
+                            },
+                            Peak {
+                                freq_ratio: 0.4127144691281174,
+                                width_ratio: 0.0068085437497568384,
+                                density: 0.12842242503259454,
+                            },
+                            Peak {
+                                freq_ratio: 0.4636423763762985,
+                                width_ratio: 0.18223553670777734,
+                                density: 0.13021512385919168,
+                            },
+                            Peak {
+                                freq_ratio: 0.7725557327938374,
+                                width_ratio: 0.22172509045636699,
+                                density: 0.15677966101694915,
+                            },
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.04575341399836595,
+                                density: 0.3587027379400261,
+                            },
+                            Peak {
+                                freq_ratio: 1.0543127261409175,
+                                width_ratio: 0.038828152355756144,
+                                density: 0.1170143415906128,
+                            },
+                        ],
+                    },
+                    PeaksBySpecies {
+                        species: "C",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 0.8206951351499459,
+                                width_ratio: 0.01287794720041648,
+                                density: 0.0922389726409827,
+                            },
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.009480361130519366,
+                                density: 0.6350642099385818,
+                            },
+                            Peak {
+                                freq_ratio: 1.701656323209075,
+                                width_ratio: 0.03275656569808064,
+                                density: 0.22445561139028478,
+                            },
+                            Peak {
+                                freq_ratio: 1.799679421314373,
+                                width_ratio: 0.09239242119107312,
+                                density: 0.04824120603015076,
+                            },
+                        ],
+                    },
+                    PeaksBySpecies {
+                        species: "O",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 0.18145396878390788,
+                                width_ratio: 0.18758033553125786,
+                                density: 0.06615856054058301,
+                            },
+                            Peak {
+                                freq_ratio: 0.42323679158667893,
+                                width_ratio: 0.047792337868291464,
+                                density: 0.12115973913726724,
+                            },
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.015691511559969954,
+                                density: 0.39286556140488726,
+                            },
+                            Peak {
+                                freq_ratio: 1.2184792588264752,
+                                width_ratio: 0.011568316501126785,
+                                density: 0.0641156596212776,
+                            },
+                            Peak {
+                                freq_ratio: 1.569501711042484,
+                                width_ratio: 0.01019948251398047,
+                                density: 0.3266284277520233,
+                            },
+                            Peak {
+                                freq_ratio: 2.0734329354811787,
+                                width_ratio: 0.041966446874217515,
+                                density: 0.029072051543961655,
+                            },
+                        ],
+                    },
+                    PeaksBySpecies {
+                        species: "total",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 0.18145396878390788,
+                                width_ratio: 0.13033970453217594,
+                                density: 0.06528275249026118,
+                            },
+                            Peak {
+                                freq_ratio: 0.26884233369501714,
+                                width_ratio: 0.031216092145897673,
+                                density: 0.04818426625532694,
+                            },
+                            Peak {
+                                freq_ratio: 0.3271012436357566,
+                                width_ratio: 0.06456890075953593,
+                                density: 0.0378571988810165,
+                            },
+                            Peak {
+                                freq_ratio: 0.42468909106084635,
+                                width_ratio: 0.04233369501711043,
+                                density: 0.13004261549321552,
+                            },
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.015691511559969954,
+                                density: 0.26144474365342885,
+                            },
+                            Peak {
+                                freq_ratio: 1.2184792588264752,
+                                width_ratio: 0.011568316501126785,
+                                density: 0.17610917932494966,
+                            },
+                            Peak {
+                                freq_ratio: 1.569501711042484,
+                                width_ratio: 0.01019948251398047,
+                                density: 0.20026667363852652,
+                            },
+                            Peak {
+                                freq_ratio: 2.0734329354811787,
+                                width_ratio: 0.03994658208830649,
+                                density: 0.06622395356741353,
+                            },
+                            Peak {
+                                freq_ratio: 2.192872047408397,
+                                width_ratio: 0.11162674234204158,
+                                density: 0.01458861669586133,
+                            },
+                        ],
+                    },
+                ],
+            },
+            PeaksByTemp {
+                temp: 300,
+                formatted_temp: "300K",
+                peaks_by_species: &[
+                    PeaksBySpecies {
+                        species: "Ca",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.5599887608878898,
+                                density: 0.29029217719132894,
+                            },
+                            Peak {
+                                freq_ratio: 1.4903062658050013,
+                                width_ratio: 0.16577690362461364,
+                                density: 0.20717483506126297,
+                            },
+                            Peak {
+                                freq_ratio: 1.674206237707221,
+                                width_ratio: 0.20455184040460803,
+                                density: 0.1797243166823751,
+                            },
+                            Peak {
+                                freq_ratio: 2.1522899690924415,
+                                width_ratio: 0.6381005900533857,
+                                density: 0.07422243166823751,
+                            },
+                            Peak {
+                                freq_ratio: 2.789688114638943,
+                                width_ratio: 0.5505760044956448,
+                                density: 0.10120169651272386,
+                            },
+                            Peak {
+                                freq_ratio: 3.6109862320876642,
+                                width_ratio: 0.22983984265243043,
+                                density: 0.14738454288407163,
+                            },
+                        ],
+                    },
+                    PeaksBySpecies {
+                        species: "C",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.5555222987129602,
+                                density: 0.342456608811749,
+                            },
+                            Peak {
+                                freq_ratio: 1.5875486381322959,
+                                width_ratio: 0.46932056270577677,
+                                density: 0.3367823765020027,
+                            },
+                            Peak {
+                                freq_ratio: 2.3189164920682432,
+                                width_ratio: 0.5869500149655792,
+                                density: 0.2082777036048064,
+                            },
+                            Peak {
+                                freq_ratio: 3.7943729422328647,
+                                width_ratio: 0.47964681233163725,
+                                density: 0.11248331108144194,
+                            },
+                        ],
+                    },
+                    PeaksBySpecies {
+                        species: "O",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.40892303146698183,
+                                density: 0.3881686204487229,
+                            },
+                            Peak {
+                                freq_ratio: 1.592997488550746,
+                                width_ratio: 0.5885655192790664,
+                                density: 0.28219858706622153,
+                            },
+                            Peak {
+                                freq_ratio: 2.3535234155709857,
+                                width_ratio: 0.7445708376421923,
+                                density: 0.13061874078099528,
+                            },
+                            Peak {
+                                freq_ratio: 3.7456049638055844,
+                                width_ratio: 0.4301964839710445,
+                                density: 0.13958543591336076,
+                            },
+                            Peak {
+                                freq_ratio: 8.849903973999114,
+                                width_ratio: 0.13931156743979908,
+                                density: 0.05290738296716094,
+                            },
+                            Peak {
+                                freq_ratio: 13.889939429753287,
+                                width_ratio: 0.09041217314226623,
+                                density: 0.006521232823538545,
+                            },
+                        ],
+                    },
+                    PeaksBySpecies {
+                        species: "total",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.4192642931009012,
+                                density: 0.35864146612631354,
+                            },
+                            Peak {
+                                freq_ratio: 1.592997488550746,
+                                width_ratio: 0.6123504210370809,
+                                density: 0.2699494315532762,
+                            },
+                            Peak {
+                                freq_ratio: 2.3535234155709857,
+                                width_ratio: 0.5906337716058502,
+                                density: 0.11297206182978876,
+                            },
+                            Peak {
+                                freq_ratio: 2.8948145959521345,
+                                width_ratio: 0.49889200768208014,
+                                density: 0.0658824373274038,
+                            },
+                            Peak {
+                                freq_ratio: 3.7584576746934557,
+                                width_ratio: 0.37568326192938395,
+                                density: 0.14374349962342645,
+                            },
+                            Peak {
+                                freq_ratio: 8.849903973999114,
+                                width_ratio: 0.1391638351307431,
+                                density: 0.03399921098877452,
+                            },
+                            Peak {
+                                freq_ratio: 10.783424434923917,
+                                width_ratio: 0.10252622248485745,
+                                density: 0.010938564716852563,
+                            },
+                            Peak {
+                                freq_ratio: 13.889939429753287,
+                                width_ratio: 0.09041217314226623,
+                                density: 0.0038733278341641863,
+                            },
+                        ],
+                    },
+                ],
+            },
+            PeaksByTemp {
+                temp: 600,
+                formatted_temp: "600K",
+                peaks_by_species: &[
+                    PeaksBySpecies {
+                        species: "Ca",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.5411632481033998,
+                                density: 0.2665160318485044,
+                            },
+                            Peak {
+                                freq_ratio: 1.4903062658050013,
+                                width_ratio: 0.024585557740938464,
+                                density: 0.20072089520120506,
+                            },
+                            Peak {
+                                freq_ratio: 1.674206237707221,
+                                width_ratio: 0.5535262714245573,
+                                density: 0.17774908543146117,
+                            },
+                            Peak {
+                                freq_ratio: 2.789688114638943,
+                                width_ratio: 0.8575442540039336,
+                                density: 0.11426726920593931,
+                            },
+                            Peak {
+                                freq_ratio: 3.6109862320876642,
+                                width_ratio: 0.15720708064062938,
+                                density: 0.18479664299548096,
+                            },
+                            Peak {
+                                freq_ratio: 3.8071087384096653,
+                                width_ratio: 0.13669570103961787,
+                                density: 0.05595007531740908,
+                            },
+                        ],
+                    },
+                    PeaksBySpecies {
+                        species: "C",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 0.09154302467359883,
+                                width_ratio: 0.0023974901702903018,
+                                density: 0.2581213800050365,
+                            },
+                            Peak {
+                                freq_ratio: 0.145329004151083,
+                                width_ratio: 0.1386982313372515,
+                                density: 0.26945353815159906,
+                            },
+                            Peak {
+                                freq_ratio: 0.34734837587165895,
+                                width_ratio: 0.0418259285136931,
+                                density: 0.11583983883152858,
+                            },
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.009494061074349596,
+                                density: 0.3565852430118358,
+                            },
+                        ],
+                    },
+                    PeaksBySpecies {
+                        species: "O",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.4021273452504063,
+                                density: 0.3180054696940787,
+                            },
+                            Peak {
+                                freq_ratio: 1.592997488550746,
+                                width_ratio: 0.5924065593145221,
+                                density: 0.24594543026140048,
+                            },
+                            Peak {
+                                freq_ratio: 2.3535234155709857,
+                                width_ratio: 0.7590486039296794,
+                                density: 0.12376772880493545,
+                            },
+                            Peak {
+                                freq_ratio: 3.7456049638055844,
+                                width_ratio: 0.4301964839710445,
+                                density: 0.156013483431915,
+                            },
+                            Peak {
+                                freq_ratio: 8.849903973999114,
+                                width_ratio: 0.1391638351307431,
+                                density: 0.12166889270495453,
+                            },
+                            Peak {
+                                freq_ratio: 13.889939429753287,
+                                width_ratio: 0.09041217314226623,
+                                density: 0.03459899510271577,
+                            },
+                        ],
+                    },
+                    PeaksBySpecies {
+                        species: "total",
+                        peaks: &[
+                            Peak {
+                                freq_ratio: 1.0,
+                                width_ratio: 0.40035455754173443,
+                                density: 0.29418686749823486,
+                            },
+                            Peak {
+                                freq_ratio: 1.592997488550746,
+                                width_ratio: 0.6417491505392229,
+                                density: 0.23555542480583666,
+                            },
+                            Peak {
+                                freq_ratio: 2.3663761264588565,
+                                width_ratio: 0.5706899098832915,
+                                density: 0.10667215815485996,
+                            },
+                            Peak {
+                                freq_ratio: 2.8948145959521345,
+                                width_ratio: 0.5107105924065594,
+                                density: 0.06654506942810073,
+                            },
+                            Peak {
+                                freq_ratio: 3.7584576746934557,
+                                width_ratio: 0.375535529620328,
+                                density: 0.16109672864203342,
+                            },
+                            Peak {
+                                freq_ratio: 8.849903973999114,
+                                width_ratio: 0.1390161028216871,
+                                density: 0.0782831254412803,
+                            },
+                            Peak {
+                                freq_ratio: 10.783424434923917,
+                                width_ratio: 0.10237849017580145,
+                                density: 0.03433160743704401,
+                            },
+                            Peak {
+                                freq_ratio: 13.889939429753287,
+                                width_ratio: 0.09041217314226623,
+                                density: 0.02050482466462697,
+                            },
+                            Peak {
+                                freq_ratio: 18.34968237553553,
+                                width_ratio: 0.36873984340375243,
+                                density: 0.0028241939279830546,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    Material {
         mp_id: "mp-66",
         name: "diamond",
         peaks_by_temp: &[
