@@ -58,6 +58,10 @@ impl<'a> SingingMaterials<'a> {
     pub fn get_sample_rate(&self) -> u32 {
         self.sample_rate
     }
+
+    pub fn get_material_name(&self) -> &'static str {
+        self.voices.voices[0].clone().get_material_name()
+    }
 }
 
 impl<'a> Engine for SingingMaterials<'a> {
