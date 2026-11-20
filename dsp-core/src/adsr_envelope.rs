@@ -1,5 +1,7 @@
+use alloc::sync::Arc;
 use alloc::vec;
 use alloc::vec::Vec;
+use core::sync::atomic::{AtomicBool, Ordering};
 
 use crate::{
     DEFAULT_SAMPLE_RATE,
@@ -25,6 +27,7 @@ pub struct ADSREnvelope {
     open: bool,
     releasing: bool,
     release_complete: bool,
+    on: Option<Arc<AtomicBool>>,
     parameters: Vec<Parameter>,
 }
 
@@ -53,6 +56,7 @@ impl ADSREnvelope {
             open: false,
             releasing: false,
             release_complete: true,
+            on: None,
             parameters: vec![
                 Parameter::new("Attack", attack, 0.1, (0.0, 2.0)),
                 Parameter::new("Decay", decay, 0.1, (0.0, 2.0)),
@@ -72,6 +76,16 @@ impl ADSREnvelope {
         self.release_step = self.amp / self.release_samples as f32;
     }
 
+    pub fn set_note_flag(&mut self, on: Arc<AtomicBool>) {
+        self.on = Some(on);
+    }
+
+    pub fn retrigger(&mut self) {
+        self.elapsed_samples = 0;
+        self.releasing = false;
+        self.release_complete = false;
+    }
+
     pub fn get_open(&self) -> bool {
         self.open
     }
@@ -89,6 +103,15 @@ impl Iterator for ADSREnvelope {
     type Item = f32;
 
     fn next(&mut self) -> Option<f32> {
+        if self.releasing
+            && let Some(on) = &self.on
+            && on.load(Ordering::Relaxed)
+        {
+            self.elapsed_samples = 0;
+            self.releasing = false;
+            self.release_complete = false;
+        }
+
         match self.releasing {
             false => {
                 self.release_complete = false;

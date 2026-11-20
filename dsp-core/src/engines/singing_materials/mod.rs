@@ -47,7 +47,8 @@ impl<'a> SingingMaterials<'a> {
                 Parameter::new("Wave", 1.0, 1.0, (1.0, 4.0)),
                 Parameter::new("Species", 0.0, 1.0, (0.0, 3.0)),
                 Parameter::new("Temp", 0.0, 1.0, (0.0, 2.0)),
-                Parameter::new("Mix", 1.0, 0.1, (0.0, 1.0)),
+                Parameter::new("Mix", 0.5, 0.1, (0.0, 1.0)),
+                Parameter::new("Bandwidth", 0.5, 0.1, (0.0, 1.0)),
             ],
         }
     }
@@ -185,6 +186,11 @@ impl<'a> UserParameters for SingingMaterials<'a> {
                 4 => {
                     self.voices.voices.iter_mut().for_each(|voice| {
                         voice.set_mix(value);
+                    });
+                }
+                5 => {
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        voice.set_base_lfo_amp(value);
                     });
                 }
                 _ => {}
