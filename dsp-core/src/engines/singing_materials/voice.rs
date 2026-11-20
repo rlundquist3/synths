@@ -1,4 +1,5 @@
 use core::sync::atomic::AtomicBool;
+use core::{array, f32};
 
 use alloc::sync::Arc;
 use heapless::Vec;
@@ -6,19 +7,12 @@ use heapless::Vec;
 use crate::DEFAULT_SAMPLE_RATE;
 use crate::adsr_envelope::ADSREnvelope;
 use crate::engines::singing_materials::data::MATERIALS;
-use crate::engines::singing_materials::types::{PeaksBySpecies, PeaksByTemp};
+use crate::engines::singing_materials::types::{Peak, PeaksBySpecies, PeaksByTemp};
 use crate::midi::get_linear_bent_freq;
 use crate::oscillator::{Oscillator, Waveform};
 use crate::voices::Voice;
 
 pub const OSCILLATOR_COUNT: usize = 9;
-
-/*
-TODO:
-- add temperature and species isolation parameters
-- play with the width data to inform per-oscillator vibrato
-- play with different envelopes per oscillator (bit of a refactor, but could sound interesting)
-*/
 
 pub struct SingingMaterialsVoice<'a> {
     sample_rate: u32,
@@ -30,6 +24,8 @@ pub struct SingingMaterialsVoice<'a> {
     species: &'a str,
     peaks_by_temp: &'a PeaksByTemp,
     peaks_by_species: &'a PeaksBySpecies,
+    mix: f32,
+    osc_amps: [f32; OSCILLATOR_COUNT],
 
     pub envelope: Option<ADSREnvelope>,
     pub on: Arc<AtomicBool>,
@@ -54,6 +50,9 @@ impl<'a> SingingMaterialsVoice<'a> {
             .find(|p| p.species == "total")
             .unwrap();
 
+        let densities =
+            array::from_fn(|i| peaks_by_species.peaks.get(i).map_or(0.0, |p| p.density));
+
         SingingMaterialsVoice {
             sample_rate: DEFAULT_SAMPLE_RATE,
             freq: 0.0,
@@ -64,6 +63,8 @@ impl<'a> SingingMaterialsVoice<'a> {
             species: "total",
             peaks_by_temp,
             peaks_by_species,
+            mix: 1.0,
+            osc_amps: densities,
             envelope,
             on: Arc::new(AtomicBool::new(false)),
         }
@@ -83,6 +84,14 @@ impl<'a> SingingMaterialsVoice<'a> {
         }
     }
 
+    pub fn set_temp_by_index(&mut self, temp_index: usize) {
+        if temp_index < MATERIALS[self.material_index].peaks_by_temp.len() {
+            let temp = MATERIALS[self.material_index].peaks_by_temp[temp_index].temp;
+            self.set_temp(temp);
+        }
+    }
+
+    // TODO: temp currently is discrete - consider blending peaks at different temp values
     pub fn set_temp(&mut self, temp: u16) {
         if let Some(peaks_by_temp) = MATERIALS[self.material_index]
             .peaks_by_temp
@@ -111,6 +120,40 @@ impl<'a> SingingMaterialsVoice<'a> {
         {
             self.species = species;
             self.peaks_by_species = peaks_by_species;
+        }
+    }
+
+    pub fn set_mix(&mut self, mix: f32) {
+        self.mix = mix;
+        self.update_osc_amps();
+    }
+
+    /// Sets amplitudes of all oscillators based on a mix parameter
+    /// mix == 0 -> fundamental freq has amp of 1, others 0
+    /// mix == 1 -> amplitudes of all oscillators are respective density values
+    pub fn update_osc_amps(&mut self) {
+        let densities = array::from_fn(|i| {
+            self.peaks_by_species
+                .peaks
+                .get(i)
+                .map_or(0.0, |p| p.density)
+        });
+        let max = densities.iter().copied().reduce(f32::max).unwrap_or(0.0);
+
+        if max > 0.0 {
+            let overtone_sum: f32 = densities
+                .iter()
+                .copied()
+                .filter(|d| *d != max)
+                .map(|d| self.mix * d)
+                .sum();
+            self.osc_amps = densities.map(|d| {
+                if d == max {
+                    1.0 - overtone_sum
+                } else {
+                    self.mix * d
+                }
+            });
         }
     }
 
@@ -168,6 +211,8 @@ impl<'a> Clone for SingingMaterialsVoice<'a> {
             species: self.species,
             peaks_by_temp: self.peaks_by_temp,
             peaks_by_species: self.peaks_by_species,
+            mix: self.mix,
+            osc_amps: self.osc_amps,
             envelope: self.envelope.clone(),
             on: Arc::new(AtomicBool::new(false)),
         }
@@ -203,8 +248,7 @@ impl<'a> Iterator for SingingMaterialsVoice<'a> {
         let mut sample = 0.0;
         for i in 0..OSCILLATOR_COUNT {
             if self.peaks_by_species.peaks.len() > i {
-                sample +=
-                    self.peaks_by_species.peaks[i].density * self.oscillators[i].next_sample();
+                sample += self.osc_amps[i] * self.oscillators[i].next_sample();
             }
         }
 

@@ -18,7 +18,7 @@ pub struct PeaksBySpecies {
     pub peaks: &'static [Peak],
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Peak {
     pub freq_ratio: f32,
     pub width_ratio: f32,

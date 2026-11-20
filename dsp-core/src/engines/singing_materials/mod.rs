@@ -45,7 +45,9 @@ impl<'a> SingingMaterials<'a> {
             parameters: vec![
                 Parameter::new("Material", 0.0, 1.0, (0.0, 3.0)),
                 Parameter::new("Wave", 1.0, 1.0, (1.0, 4.0)),
-                Parameter::new("Species", 0.0, 1.0, (0.0, 2.0)),
+                Parameter::new("Species", 0.0, 1.0, (0.0, 3.0)),
+                Parameter::new("Temp", 0.0, 1.0, (0.0, 2.0)),
+                Parameter::new("Mix", 1.0, 0.1, (0.0, 1.0)),
             ],
         }
     }
@@ -173,6 +175,16 @@ impl<'a> UserParameters for SingingMaterials<'a> {
                 2 => {
                     self.voices.voices.iter_mut().for_each(|voice| {
                         voice.set_species_by_index(value as usize);
+                    });
+                }
+                3 => {
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        voice.set_temp_by_index(value as usize);
+                    });
+                }
+                4 => {
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        voice.set_mix(value);
                     });
                 }
                 _ => {}
