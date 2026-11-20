@@ -14,11 +14,10 @@ pub enum APIToCVModes {
 }
 
 pub struct APIToCV {
-    mode: APIToCVModes,
+    mode: APIToCVModes, // TODO: re-evaluate whether mode actually needs to live here (might be owned externally)
     inputs: [IOMapping; INPUT_COUNT],
     outputs: [f32; OUTPUT_COUNT],
     // TODO: data transformation functions
-    // TODO: clock? might be external, just calling next on tick?
 }
 
 impl APIToCV {

@@ -1,3 +1,4 @@
+use alloc::boxed::Box;
 use core::f32::consts::PI;
 use micromath::F32Ext;
 
@@ -32,6 +33,9 @@ pub struct Oscillator {
     pub phase: f32,
     pub phase_delta: f32,
     last_tri_sample: f32,
+
+    lfo: Option<Box<Oscillator>>,
+    lfo_amp: f32,
 }
 
 impl Oscillator {
@@ -43,11 +47,26 @@ impl Oscillator {
             phase: 0.0,
             phase_delta: 0.0,
             last_tri_sample: 0.0,
+
+            lfo: Some(Box::new(Oscillator {
+                sample_rate: DEFAULT_SAMPLE_RATE,
+                waveform,
+                freq: 0.0,
+                phase: 0.0,
+                phase_delta: 0.0,
+                last_tri_sample: 0.0,
+                lfo: None,
+                lfo_amp: 0.0,
+            })),
+            lfo_amp: 0.0,
         }
     }
 
     pub fn set_sample_rate(&mut self, sample_rate: u32) {
         self.sample_rate = sample_rate;
+        if let Some(lfo) = self.lfo.as_mut() {
+            lfo.set_sample_rate(sample_rate);
+        }
     }
 
     pub fn set_waveform(&mut self, waveform: Waveform) {
@@ -66,8 +85,29 @@ impl Oscillator {
         self.phase = phase;
     }
 
+    pub fn set_lfo_amp(&mut self, amp: f32) {
+        self.lfo_amp = amp;
+    }
+
+    pub fn set_lfo_freq(&mut self, freq: f32) {
+        if let Some(lfo) = self.lfo.as_mut() {
+            lfo.set_freq(freq);
+        }
+    }
+
     pub fn next_phase(&mut self) -> f32 {
-        self.phase += self.phase_delta;
+        let mut delta = self.phase_delta;
+
+        if self.lfo_amp > 0.0
+            && let Some(lfo) = self.lfo.as_mut()
+        {
+            if lfo.freq > 0.0 {
+                let modulation = self.lfo_amp * lfo.next_sample();
+                delta = self.freq * (1.0 + modulation) * 2.0 * PI / (self.sample_rate as f32);
+            }
+        }
+
+        self.phase += delta;
         if self.phase >= 2.0 * PI {
             self.phase -= 2.0 * PI;
         }
@@ -75,8 +115,7 @@ impl Oscillator {
         self.phase
     }
 
-    // TODO: evaluate moving LFO into oscillator so engines can just call next_phase/next_sample and DRY things up.
-
+    #[deprecated(note = "use internal LFO instead")]
     pub fn next_phase_with_mod(&mut self, modulation: f32) -> f32 {
         let delta = self.freq * (1.0 + modulation) * 2.0 * PI / (self.sample_rate as f32);
         self.phase += delta;
@@ -125,6 +164,7 @@ impl Oscillator {
         sample
     }
 
+    #[deprecated(note = "use internal LFO instead")]
     pub fn next_sample_with_mod(&mut self, modulation: f32) -> f32 {
         self.next_phase_with_mod(modulation);
         let sample = sample_for_phase(

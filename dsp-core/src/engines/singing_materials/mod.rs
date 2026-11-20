@@ -1,12 +1,12 @@
 use alloc::vec;
 use alloc::vec::Vec;
+use core::fmt::Write;
 use core::sync::atomic::Ordering;
 
 use crate::DEFAULT_SAMPLE_RATE;
 use crate::effects::gain::Gain;
 use crate::engines::Engine;
-use crate::engines::singing_materials::material::OSCILLATOR_COUNT;
-use crate::engines::singing_materials::voice::SingingMaterialsVoice;
+use crate::engines::singing_materials::voice::{OSCILLATOR_COUNT, SingingMaterialsVoice};
 use crate::midi::MIDI_NOTE_FREQS;
 use crate::oscillator::Waveform;
 use crate::parameter::ParameterChange::{self, Decrement, Increment};
@@ -14,7 +14,8 @@ use crate::parameter::UserParameters;
 use crate::voices::{Voice, Voices};
 use crate::{adsr_envelope::ADSREnvelope, effects::Effect, parameter::Parameter};
 
-pub mod material;
+mod data;
+pub mod types;
 pub mod voice;
 
 const VOICE_COUNT: usize = 6;
@@ -44,6 +45,10 @@ impl<'a> SingingMaterials<'a> {
             parameters: vec![
                 Parameter::new("Material", 0.0, 1.0, (0.0, 3.0)),
                 Parameter::new("Wave", 1.0, 1.0, (1.0, 4.0)),
+                Parameter::new("Species", 0.0, 1.0, (0.0, 3.0)),
+                Parameter::new("Temp", 0.0, 1.0, (0.0, 2.0)),
+                Parameter::new("Mix", 0.5, 0.1, (0.0, 1.0)),
+                Parameter::new("Bandwidth", 0.5, 0.1, (0.0, 1.0)),
             ],
         }
     }
@@ -57,6 +62,20 @@ impl<'a> SingingMaterials<'a> {
 
     pub fn get_sample_rate(&self) -> u32 {
         self.sample_rate
+    }
+
+    pub fn get_material_name(&self) -> &'static str {
+        self.voices.voices[0].clone().get_material_name()
+    }
+
+    pub fn get_current_temp(&self) -> &'static str {
+        self.voices.voices[0].clone().get_current_temp()
+    }
+
+    pub fn get_current_species(&self) -> heapless::String<8> {
+        let mut s = heapless::String::<8>::new();
+        write!(s, "{}", self.voices.voices[0].clone().get_current_species()).unwrap();
+        s
     }
 }
 
@@ -137,7 +156,7 @@ impl<'a> UserParameters for SingingMaterials<'a> {
             match index {
                 0 => {
                     self.voices.voices.iter_mut().for_each(|voice| {
-                        voice.set_material(value as usize);
+                        voice.set_material_index(value as usize);
                     });
                 }
                 1 => {
@@ -152,6 +171,26 @@ impl<'a> UserParameters for SingingMaterials<'a> {
                         for i in 0..OSCILLATOR_COUNT {
                             voice.set_waveform(i, waveform.clone());
                         }
+                    });
+                }
+                2 => {
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        voice.set_species_by_index(value as usize);
+                    });
+                }
+                3 => {
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        voice.set_temp_by_index(value as usize);
+                    });
+                }
+                4 => {
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        voice.set_mix(value);
+                    });
+                }
+                5 => {
+                    self.voices.voices.iter_mut().for_each(|voice| {
+                        voice.set_base_lfo_amp(value);
                     });
                 }
                 _ => {}

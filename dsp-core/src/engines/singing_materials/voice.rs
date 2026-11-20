@@ -1,24 +1,32 @@
 use core::sync::atomic::AtomicBool;
+use core::{array, f32};
 
 use alloc::sync::Arc;
 use heapless::Vec;
 
 use crate::DEFAULT_SAMPLE_RATE;
 use crate::adsr_envelope::ADSREnvelope;
-use crate::engines::singing_materials::material::{
-    MATERIAL_COUNT, MATERIALS, Material, OSCILLATOR_COUNT,
-};
+use crate::engines::singing_materials::data::MATERIALS;
+use crate::engines::singing_materials::types::{PeaksBySpecies, PeaksByTemp};
 use crate::midi::get_linear_bent_freq;
 use crate::oscillator::{Oscillator, Waveform};
 use crate::voices::Voice;
 
+pub const OSCILLATOR_COUNT: usize = 9;
+
 pub struct SingingMaterialsVoice<'a> {
     sample_rate: u32,
-    freq: f32,
+    fund_freq: f32,
     midi_note: usize,
     oscillators: Vec<Oscillator, OSCILLATOR_COUNT>,
-    materials: Vec<Material<'a>, MATERIAL_COUNT>,
-    material_index: usize,
+    material_index: usize, // TODO: may need to keep track of id instead
+    temp: u16,
+    species: &'a str,
+    peaks_by_temp: &'a PeaksByTemp,
+    peaks_by_species: &'a PeaksBySpecies,
+    mix: f32,
+    osc_amps: [f32; OSCILLATOR_COUNT],
+    base_lfo_amp: f32,
 
     pub envelope: Option<ADSREnvelope>,
     pub on: Arc<AtomicBool>,
@@ -26,22 +34,54 @@ pub struct SingingMaterialsVoice<'a> {
 
 impl<'a> SingingMaterialsVoice<'a> {
     pub fn new(envelope: Option<ADSREnvelope>) -> Self {
-        let osc = Oscillator::new(Waveform::Sine);
+        let mut osc = Oscillator::new(Waveform::Sine);
+        osc.set_lfo_freq(10.0);
         let mut oscillators: Vec<Oscillator, OSCILLATOR_COUNT> = Vec::new();
         for _ in 0..OSCILLATOR_COUNT {
             oscillators.push(osc.clone()).ok();
         }
 
-        SingingMaterialsVoice {
+        let peaks_by_temp = MATERIALS[0]
+            .peaks_by_temp
+            .iter()
+            .find(|p| p.temp == 0)
+            .unwrap();
+        let peaks_by_species = peaks_by_temp
+            .peaks_by_species
+            .iter()
+            .find(|p| p.species == "total")
+            .unwrap();
+
+        let densities =
+            array::from_fn(|i| peaks_by_species.peaks.get(i).map_or(0.0, |p| p.density));
+
+        let on = Arc::new(AtomicBool::new(false));
+
+        let mut v = SingingMaterialsVoice {
             sample_rate: DEFAULT_SAMPLE_RATE,
-            freq: 0.0,
+            fund_freq: 0.0,
             midi_note: 0,
             oscillators,
-            materials: MATERIALS,
             material_index: 0,
+            temp: 0,
+            species: "total",
+            peaks_by_temp,
+            peaks_by_species,
+            mix: 0.5,
+            osc_amps: densities,
+            base_lfo_amp: 0.5,
             envelope,
-            on: Arc::new(AtomicBool::new(false)),
+            on: Arc::clone(&on),
+        };
+
+        if let Some(envelope) = &mut v.envelope {
+            envelope.set_note_flag(on);
         }
+
+        v.update_osc_amps();
+        v.update_lfos();
+
+        v
     }
 
     pub fn set_sample_rate(&mut self, sample_rate: u32) {
@@ -51,12 +91,123 @@ impl<'a> SingingMaterialsVoice<'a> {
         });
     }
 
-    pub fn set_material(&mut self, index: usize) {
-        self.material_index = index;
+    pub fn set_material_index(&mut self, index: usize) {
+        if index < MATERIALS.len() {
+            self.material_index = index;
+            self.species = "total";
+            self.set_temp(self.temp);
+        }
     }
 
-    pub fn get_material_name(self) -> &'a str {
-        self.materials[self.material_index].name
+    pub fn set_temp_by_index(&mut self, temp_index: usize) {
+        if temp_index < MATERIALS[self.material_index].peaks_by_temp.len() {
+            let temp = MATERIALS[self.material_index].peaks_by_temp[temp_index].temp;
+            self.set_temp(temp);
+        }
+    }
+
+    // TODO: temp currently is discrete - consider blending peaks at different temp values
+    pub fn set_temp(&mut self, temp: u16) {
+        if let Some(peaks_by_temp) = MATERIALS[self.material_index]
+            .peaks_by_temp
+            .iter()
+            .find(|p| p.temp == temp)
+        {
+            self.temp = temp;
+            self.peaks_by_temp = peaks_by_temp;
+            self.set_species(self.species);
+        }
+    }
+
+    pub fn set_species_by_index(&mut self, species_index: usize) {
+        if species_index < self.peaks_by_temp.peaks_by_species.len() {
+            let species = self.peaks_by_temp.peaks_by_species[species_index].species;
+            self.set_species(species);
+        }
+    }
+
+    pub fn set_species(&mut self, species: &'a str) {
+        if let Some(peaks_by_species) = self
+            .peaks_by_temp
+            .peaks_by_species
+            .iter()
+            .find(|p| p.species == species)
+        {
+            self.species = species;
+            self.peaks_by_species = peaks_by_species;
+            self.update_osc_freqs();
+            self.update_osc_amps();
+            self.update_lfos();
+        }
+    }
+
+    pub fn set_mix(&mut self, mix: f32) {
+        self.mix = mix;
+        self.update_osc_amps();
+    }
+
+    pub fn set_base_lfo_amp(&mut self, amp: f32) {
+        self.base_lfo_amp = amp;
+        self.update_lfos();
+    }
+
+    fn update_osc_freqs(&mut self) {
+        for i in 0..OSCILLATOR_COUNT {
+            if self.peaks_by_species.peaks.len() > i {
+                self.oscillators[i]
+                    .set_freq(self.fund_freq * self.peaks_by_species.peaks[i].freq_ratio);
+            }
+        }
+    }
+
+    /// Sets amplitudes of all oscillators based on a mix parameter
+    /// mix == 0 -> fundamental freq has amp of 1, others 0
+    /// mix == 1 -> amplitudes of all oscillators are respective density values
+    fn update_osc_amps(&mut self) {
+        let densities = array::from_fn(|i| {
+            self.peaks_by_species
+                .peaks
+                .get(i)
+                .map_or(0.0, |p| p.density)
+        });
+        let max = densities.iter().copied().reduce(f32::max).unwrap_or(0.0);
+
+        if max > 0.0 {
+            let overtone_sum: f32 = densities
+                .iter()
+                .copied()
+                .filter(|d| *d != max)
+                .map(|d| self.mix * d)
+                .sum();
+            self.osc_amps = densities.map(|d| {
+                if d == max {
+                    1.0 - overtone_sum
+                } else {
+                    self.mix * d
+                }
+            });
+        }
+    }
+
+    fn update_lfos(&mut self) {
+        for i in 0..OSCILLATOR_COUNT {
+            if self.peaks_by_species.peaks.len() > i {
+                self.oscillators[i]
+                    .set_lfo_amp(self.base_lfo_amp * self.peaks_by_species.peaks[i].width_ratio);
+            }
+        }
+    }
+
+    pub fn get_material_name(self) -> &'static str {
+        MATERIALS[self.material_index].name
+    }
+
+    pub fn get_current_temp(&self) -> &'static str {
+        self.peaks_by_temp.formatted_temp
+    }
+
+    pub fn get_current_species(&self) -> &str {
+        self.species
     }
 
     pub fn set_waveform(&mut self, osc_index: usize, waveform: Waveform) {
@@ -91,25 +242,38 @@ impl<'a> SingingMaterialsVoice<'a> {
 
 impl<'a> Clone for SingingMaterialsVoice<'a> {
     fn clone(&self) -> Self {
-        SingingMaterialsVoice {
+        let on = Arc::new(AtomicBool::new(false));
+        let mut clone = SingingMaterialsVoice {
             sample_rate: self.sample_rate,
-            freq: self.freq,
+            fund_freq: self.fund_freq,
             midi_note: self.midi_note,
             oscillators: self.oscillators.clone(),
-            materials: self.materials.clone(),
             material_index: self.material_index,
+            temp: self.temp,
+            species: self.species,
+            peaks_by_temp: self.peaks_by_temp,
+            peaks_by_species: self.peaks_by_species,
+            mix: self.mix,
+            osc_amps: self.osc_amps,
+            base_lfo_amp: self.base_lfo_amp,
             envelope: self.envelope.clone(),
-            on: Arc::new(AtomicBool::new(false)),
+            on: Arc::clone(&on),
+        };
+
+        // Each clone gets a fresh note flag; re-wire the cloned envelope to it.
+        if let Some(envelope) = &mut clone.envelope {
+            envelope.set_note_flag(on);
         }
+
+        clone
     }
 }
 
 impl<'a> Voice for SingingMaterialsVoice<'a> {
     fn set_freq(&mut self, freq: f32, midi_note: usize) {
-        for i in 0..OSCILLATOR_COUNT {
-            self.oscillators[i].set_freq(freq * self.materials[self.material_index].ratios[i]);
-        }
+        self.fund_freq = freq;
         self.midi_note = midi_note;
+        self.update_osc_freqs();
     }
 
     fn set_pitch_bend(&mut self, midi_bend: u16) {
@@ -130,8 +294,9 @@ impl<'a> Iterator for SingingMaterialsVoice<'a> {
 
         let mut sample = 0.0;
         for i in 0..OSCILLATOR_COUNT {
-            sample +=
-                self.materials[self.material_index].amps[i] * self.oscillators[i].next_sample();
+            if self.peaks_by_species.peaks.len() > i {
+                sample += self.osc_amps[i] * self.oscillators[i].next_sample();
+            }
         }
 
         // clamp should be unnecessary, but here for safety
