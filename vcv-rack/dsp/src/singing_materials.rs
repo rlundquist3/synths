@@ -20,7 +20,7 @@ impl<'a> SingingMaterials<'a> {
     }
 
     pub(crate) fn set_material(&mut self, index: usize) {
-        self.0.set_material(index);
+        self.0.set_material_index(index);
     }
 
     pub(crate) fn get_material_name(&self) -> &'a str {
