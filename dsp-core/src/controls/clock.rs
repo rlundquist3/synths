@@ -1,13 +1,17 @@
+use core::fmt::Error;
+
+#[derive(Clone)]
 pub struct Clock {
-    pub(crate) bpm: u16,
-    pub(crate) division: Note,
-    pub(crate) time_signature: TimeSignature,
-    pub(crate) tick_ms: u16,
+    pub bpm: u16,
+    pub division: Note,
+    pub time_signature: TimeSignature,
+    pub tick_ms: u16,
 }
 
+#[derive(Clone)]
 pub struct TimeSignature {
-    per_measure: u8,
-    base: Note,
+    pub per_measure: u8,
+    pub base: Note,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -18,6 +22,31 @@ pub enum Note {
     Sixteenth,
     SixteenthTriplet,
     Thirtysecond,
+}
+
+impl Note {
+    const NOTES: [Note; 6] = [
+        Note::Quarter,
+        Note::Eighth,
+        Note::Triplet,
+        Note::Sixteenth,
+        Note::SixteenthTriplet,
+        Note::Thirtysecond,
+    ];
+
+    fn index(self) -> usize {
+        Note::NOTES.iter().position(|n| *n == self).unwrap()
+    }
+
+    fn next(self) -> Note {
+        let i = self.index();
+        Note::NOTES[(i + 1) % Note::NOTES.len()]
+    }
+
+    fn prev(self) -> Note {
+        let i = self.index();
+        Note::NOTES[(i + Note::NOTES.len() - 1) % Note::NOTES.len()]
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -66,8 +95,32 @@ impl Clock {
         self.calculate_tick_ms()
     }
 
+    pub fn increment_bpm(&mut self) -> Result<(), ClockError> {
+        if self.bpm < 180 {
+            self.bpm += 1;
+            return self.calculate_tick_ms();
+        }
+        Ok(())
+    }
+    pub fn decrement_bpm(&mut self) -> Result<(), ClockError> {
+        if self.bpm > 40 {
+            self.bpm -= 1;
+            return self.calculate_tick_ms();
+        }
+        Ok(())
+    }
+
     pub fn set_division(&mut self, division: Note) -> Result<(), ClockError> {
         self.division = division;
+        self.calculate_tick_ms()
+    }
+
+    pub fn increment_division(&mut self) -> Result<(), ClockError> {
+        self.division = self.division.next();
+        self.calculate_tick_ms()
+    }
+    pub fn decrement_division(&mut self) -> Result<(), ClockError> {
+        self.division = self.division.prev();
         self.calculate_tick_ms()
     }
 
@@ -76,10 +129,40 @@ impl Clock {
         self.calculate_tick_ms()
     }
 
+    pub fn increment_time_signature_per_measure(&mut self) -> Result<(), ClockError> {
+        if self.time_signature.per_measure <= 12 {
+            self.time_signature.per_measure += 1;
+            return self.calculate_tick_ms();
+        }
+        Ok(())
+    }
+    pub fn decrement_time_signature_per_measure(&mut self) -> Result<(), ClockError> {
+        if self.time_signature.per_measure > 1 {
+            self.time_signature.per_measure -= 1;
+            return self.calculate_tick_ms();
+        }
+        Ok(())
+    }
+
     pub fn set_time_signature_base(&mut self, base: Note) -> Result<(), ClockError> {
         self.time_signature.base = base;
         self.division = base;
         self.calculate_tick_ms()
+    }
+
+    pub fn increment_time_signature_base(&mut self) -> Result<(), ClockError> {
+        if self.time_signature.base == Note::Quarter {
+            self.time_signature.base = Note::Eighth;
+            return self.calculate_tick_ms();
+        }
+        Ok(())
+    }
+    pub fn decrement_time_signature_base(&mut self) -> Result<(), ClockError> {
+        if self.time_signature.base == Note::Eighth {
+            self.time_signature.base = Note::Quarter;
+            return self.calculate_tick_ms();
+        }
+        Ok(())
     }
 
     fn calculate_tick_ms(&mut self) -> Result<(), ClockError> {
