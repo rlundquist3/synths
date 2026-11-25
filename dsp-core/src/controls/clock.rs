@@ -1,4 +1,4 @@
-use core::fmt::Error;
+use core::fmt::{Display, Formatter};
 
 #[derive(Clone)]
 pub struct Clock {
@@ -46,6 +46,20 @@ impl Note {
     fn prev(self) -> Note {
         let i = self.index();
         Note::NOTES[(i + Note::NOTES.len() - 1) % Note::NOTES.len()]
+    }
+}
+
+impl Display for Note {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        let formatted = match self {
+            Note::Quarter => "Quarter",
+            Note::Eighth => "Eighth",
+            Note::Triplet => "Triplet",
+            Note::Sixteenth => "16th",
+            Note::SixteenthTriplet => "16-trplt",
+            Note::Thirtysecond => "32nd",
+        };
+        write!(f, "{formatted}")
     }
 }
 

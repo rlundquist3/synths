@@ -11,6 +11,8 @@ Each JSON file becomes one `Material`. For every temperature listed in
 `PeaksByTemp`, followed by the whole-material peaks from
 `by_temp[<temp>].total.peaks.total` as a species named "total". Chart data
 is ignored.
+
+Data from: https://github.com/lucydot/SingingMaterialsSite/tree/main/site/data/materials
 """
 
 from __future__ import annotations

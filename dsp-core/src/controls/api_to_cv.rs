@@ -7,7 +7,7 @@ struct IOMapping {
     output_index: usize,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum APIToCVModes {
     RealTime,
     Clocked,
